@@ -26,7 +26,7 @@
  * no raw color literals are used (Requirements 14.3, 14.7).
  */
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Calendar,
   CalendarClock,
@@ -35,14 +35,14 @@ import {
   Pencil,
   Trash2,
   type LucideIcon,
-} from "lucide-react";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-import { PriorityBadge } from "@/components/PriorityBadge";
-import { cn } from "@/lib/utils";
-import { formatDue, type DueTone, type Task } from "@/lib/logic";
-import { useData } from "@/state/DataContext";
-import type { Project } from "@/lib/api";
+import { PriorityBadge } from '@/components/PriorityBadge';
+import { cn } from '@/lib/utils';
+import { formatDue, type DueTone, type Task } from '@/lib/logic';
+import { useData } from '@/state/DataContext';
+import type { Project } from '@/lib/api';
 
 /**
  * Per-tone presentation for the due-date badge, mirroring the prototype's
@@ -54,19 +54,19 @@ import type { Project } from "@/lib/api";
  *   default  -> calendar,       text-slate-500               (any later date)
  */
 const DUE_TONE_META: Record<DueTone, { icon: LucideIcon; className: string }> = {
-  none: { icon: Calendar, className: "text-slate-400" },
-  overdue: { icon: CalendarX, className: "text-destructive font-medium" },
-  today: { icon: CalendarClock, className: "text-brand-600 font-medium" },
-  tomorrow: { icon: Calendar, className: "text-slate-500" },
-  default: { icon: Calendar, className: "text-slate-500" },
+  none: { icon: Calendar, className: 'text-slate-400' },
+  overdue: { icon: CalendarX, className: 'text-destructive font-medium' },
+  today: { icon: CalendarClock, className: 'text-brand-600 font-medium' },
+  tomorrow: { icon: Calendar, className: 'text-slate-500' },
+  default: { icon: Calendar, className: 'text-slate-500' },
 };
 
 /** Today's date as a local ISO `YYYY-MM-DD` string (matches the prototype). */
 function todayIso(): string {
   const d = new Date();
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
 
@@ -85,20 +85,13 @@ export interface TaskCardProps {
   className?: string;
 }
 
-export function TaskCard({
-  task,
-  project,
-  onEdit,
-  onDelete,
-  className,
-}: TaskCardProps) {
+export function TaskCard({ task, project, onEdit, onDelete, className }: TaskCardProps) {
   const { projects, toggleComplete } = useData();
   const [toggling, setToggling] = useState(false);
 
   // Resolve the project record (prop wins; otherwise look it up by id) so the
   // color dot + name can be rendered (R7.1) or omitted when absent (R7.3).
-  const resolvedProject =
-    project ?? projects.find((p) => p.id === task.project) ?? null;
+  const resolvedProject = project ?? projects.find((p) => p.id === task.project) ?? null;
 
   const due = formatDue(task.due, todayIso());
   const dueMeta = DUE_TONE_META[due.tone];
@@ -113,14 +106,14 @@ export function TaskCard({
     try {
       await toggleComplete(task.id);
       if (willBeDone) {
-        toast.success("Tarefa concluída");
+        toast.success('Tarefa concluída');
       } else {
-        toast.info("Tarefa reaberta");
+        toast.info('Tarefa reaberta');
       }
     } catch {
       // DataContext already reverted the optimistic change (R7.14); surface the
       // failure to the user.
-      toast.error("Não foi possível atualizar a tarefa");
+      toast.error('Não foi possível atualizar a tarefa');
     } finally {
       setToggling(false);
     }
@@ -129,7 +122,7 @@ export function TaskCard({
   return (
     <div
       className={cn(
-        "task-card group flex items-start gap-3 rounded-xl border border-slate-200 bg-card p-4 transition hover:border-brand-300 hover:shadow-md",
+        'task-card group flex items-start gap-3 rounded-xl border border-slate-200 bg-card p-4 transition hover:border-brand-300 hover:shadow-md',
         className,
       )}
       data-id={task.id}
@@ -140,13 +133,13 @@ export function TaskCard({
         onClick={handleToggle}
         disabled={toggling}
         aria-pressed={task.done}
-        aria-label={task.done ? "Reabrir tarefa" : "Concluir tarefa"}
+        aria-label={task.done ? 'Reabrir tarefa' : 'Concluir tarefa'}
         title="Concluir"
         className={cn(
-          "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition disabled:cursor-not-allowed disabled:opacity-60",
+          'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition disabled:cursor-not-allowed disabled:opacity-60',
           task.done
-            ? "border-brand-600 bg-brand-600 text-white"
-            : "border-slate-300 hover:border-brand-500",
+            ? 'border-brand-600 bg-brand-600 text-white'
+            : 'border-slate-300 hover:border-brand-500',
         )}
       >
         {task.done ? <Check className="h-3 w-3" /> : null}
@@ -157,8 +150,8 @@ export function TaskCard({
           {/* Title — strikethrough when done (R7.4) */}
           <p
             className={cn(
-              "flex-1 font-medium text-slate-800",
-              task.done && "text-slate-400 line-through",
+              'flex-1 font-medium text-slate-800',
+              task.done && 'text-slate-400 line-through',
             )}
           >
             {task.title}
@@ -169,12 +162,7 @@ export function TaskCard({
 
         {/* Description — only when non-empty (R7.2) */}
         {task.desc ? (
-          <p
-            className={cn(
-              "mt-0.5 text-sm text-slate-500",
-              task.done && "line-through",
-            )}
-          >
+          <p className={cn('mt-0.5 text-sm text-slate-500', task.done && 'line-through')}>
             {task.desc}
           </p>
         ) : null}
@@ -191,7 +179,7 @@ export function TaskCard({
             </span>
           ) : null}
           {/* Due-date badge (R7.1, R7.5–R7.9) */}
-          <span className={cn("inline-flex items-center gap-1", dueMeta.className)}>
+          <span className={cn('inline-flex items-center gap-1', dueMeta.className)}>
             <DueIcon className="h-3.5 w-3.5" />
             {due.text}
           </span>

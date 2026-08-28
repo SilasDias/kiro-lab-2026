@@ -13,9 +13,9 @@
  * use OKLCH theme tokens (R14.3, R14.7).
  */
 
-import { ClipboardList, Plus } from "lucide-react";
+import { ClipboardList, Plus } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 export interface EmptyStateProps {
   /**
@@ -32,9 +32,7 @@ export function EmptyState({ onNewTask }: EmptyStateProps) {
         <ClipboardList className="h-8 w-8 text-brand-500" />
       </div>
       <h3 className="font-semibold text-slate-700">Nenhuma tarefa por aqui</h3>
-      <p className="mt-1 mb-4 text-sm text-slate-400">
-        Crie sua primeira tarefa para começar.
-      </p>
+      <p className="mt-1 mb-4 text-sm text-slate-400">Crie sua primeira tarefa para começar.</p>
       <Button onClick={onNewTask}>
         <Plus className="h-4 w-4" />
         Nova tarefa

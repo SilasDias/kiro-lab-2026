@@ -14,12 +14,12 @@
  * `Task.due` representation in `logic.ts`.
  */
 
-import * as React from "react";
+import * as React from 'react';
 
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
-export type DateFieldProps = Omit<React.ComponentProps<"input">, "type">;
+export type DateFieldProps = Omit<React.ComponentProps<'input'>, 'type'>;
 
 function DateField({ className, ...props }: DateFieldProps) {
   return (
@@ -29,9 +29,9 @@ function DateField({ className, ...props }: DateFieldProps) {
       className={cn(
         // Tint the native calendar indicator with the current text color so it
         // matches the themed foreground rather than the browser default.
-        "[&::-webkit-calendar-picker-indicator]:cursor-pointer",
-        "[&::-webkit-calendar-picker-indicator]:opacity-60",
-        "hover:[&::-webkit-calendar-picker-indicator]:opacity-100",
+        '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
+        '[&::-webkit-calendar-picker-indicator]:opacity-60',
+        'hover:[&::-webkit-calendar-picker-indicator]:opacity-100',
         className,
       )}
       {...props}

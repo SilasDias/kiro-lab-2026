@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Formatar com Prettier ao terminar",
+      "trigger": "Stop",
+      "action": {
+        "type": "command",
+        "command": "cd taskiro && bunx prettier --write ."
+      },
+      "enabled": false
+    }
+  ]
+}

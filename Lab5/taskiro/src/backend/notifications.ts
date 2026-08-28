@@ -17,10 +17,10 @@
 //
 // Requirements: 10.5, 10.6, 16.4, 19.1
 
-import { Elysia } from "elysia";
-import { requireAuth } from "./app";
-import { getDatabase, type NotificationRow } from "./db";
-import { listOwned, OWNER_COLUMN } from "./scoping";
+import { Elysia } from 'elysia';
+import { requireAuth } from './app';
+import { getDatabase, type NotificationRow } from './db';
+import { listOwned, OWNER_COLUMN } from './scoping';
 
 /** Wire representation of a Notification (front-end `Notification` shape). */
 export interface NotificationDTO {
@@ -57,18 +57,18 @@ export function markAllNotificationsRead(userId: string): number {
  * `requireAuth`, so each handler receives the authenticated `user`; the guard
  * rejects unauthenticated requests with 401 before any handler runs.
  */
-export const notificationRoutes = new Elysia({ prefix: "/api/notifications" })
+export const notificationRoutes = new Elysia({ prefix: '/api/notifications' })
   .use(requireAuth)
   // List the authenticated user's notifications, most-recent-first (R16.4, R19.1).
-  .get("/", ({ user }) => {
-    const rows = listOwned<NotificationRow>(getDatabase(), "notifications", user.id, {
-      orderBy: "time",
-      direction: "desc",
+  .get('/', ({ user }) => {
+    const rows = listOwned<NotificationRow>(getDatabase(), 'notifications', user.id, {
+      orderBy: 'time',
+      direction: 'desc',
     });
     return rows.map(toNotificationDTO);
   })
   // Mark all of the user's notifications as read (R10.5, R10.6, R19.1).
-  .post("/mark-all-read", ({ user }) => {
+  .post('/mark-all-read', ({ user }) => {
     const updated = markAllNotificationsRead(user.id);
     return { updated };
   });

@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "bun --hot src/server.ts",
     "start": "bun src/server.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@elysiajs/jwt": "^1.3.0",
@@ -35,6 +37,7 @@
     "@types/react-dom": "^19.1.0",
     "bun-plugin-tailwind": "^0.0.15",
     "fast-check": "^4.0.0",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4.1.0",
     "tw-animate-css": "^1.3.0",
     "typescript": "^5.8.0"

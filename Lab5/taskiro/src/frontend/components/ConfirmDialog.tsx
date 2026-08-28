@@ -25,8 +25,8 @@
  * 14.7).
  */
 
-import { useCallback, useState } from "react";
-import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import { useCallback, useState } from 'react';
+import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 
 import {
   AlertDialog,
@@ -38,8 +38,8 @@ import {
   AlertDialogOverlay,
   AlertDialogPortal,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
 
 /**
  * Content classes mirroring the shadcn `AlertDialogContent` wrapper. Composed
@@ -48,7 +48,7 @@ import { cn } from "@/lib/utils";
  * omits `onInteractOutside`, so overlay-cancel (R11.3) is wired on the overlay.
  */
 const CONTENT_CLASSES =
-  "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg";
+  'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg';
 
 export interface ConfirmDialogProps {
   /** Whether the dialog is visible (controlled by the owner). */
@@ -85,8 +85,8 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Confirmar",
-  cancelLabel = "Cancelar",
+  confirmLabel = 'Confirmar',
+  cancelLabel = 'Cancelar',
   destructive = false,
   onConfirm,
 }: ConfirmDialogProps) {
@@ -105,10 +105,7 @@ export function ConfirmDialog({
             the overlay explicitly requests close. Escape and the cancel control
             are handled by the primitive's default close paths. */}
         <AlertDialogOverlay onClick={() => onOpenChange(false)} />
-        <AlertDialogPrimitive.Content
-          data-slot="alert-dialog-content"
-          className={CONTENT_CLASSES}
-        >
+        <AlertDialogPrimitive.Content data-slot="alert-dialog-content" className={CONTENT_CLASSES}>
           <AlertDialogHeader>
             <AlertDialogTitle>{title}</AlertDialogTitle>
             <AlertDialogDescription>{description}</AlertDialogDescription>
@@ -119,7 +116,7 @@ export function ConfirmDialog({
               onClick={handleConfirm}
               className={cn(
                 destructive &&
-                  "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/40",
+                  'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/40',
               )}
             >
               {confirmLabel}
@@ -168,8 +165,8 @@ export function useConfirmDialog(): UseConfirmDialog {
   const dialogProps: ConfirmDialogProps = {
     open,
     onOpenChange: setOpen,
-    title: config?.title ?? "",
-    description: config?.description ?? "",
+    title: config?.title ?? '',
+    description: config?.description ?? '',
     confirmLabel: config?.confirmLabel,
     cancelLabel: config?.cancelLabel,
     destructive: config?.destructive,

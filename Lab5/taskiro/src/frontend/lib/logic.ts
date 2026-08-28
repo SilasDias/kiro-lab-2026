@@ -88,9 +88,7 @@ export function filterBySearch(tasks: Task[], query: string): Task[] {
   if (!query.trim()) return tasks;
   const q = query.toLowerCase();
   return tasks.filter(
-    (t) =>
-      t.title.toLowerCase().includes(q) ||
-      (t.desc || '').toLowerCase().includes(q),
+    (t) => t.title.toLowerCase().includes(q) || (t.desc || '').toLowerCase().includes(q),
   );
 }
 
@@ -277,10 +275,7 @@ export type DueTone = 'none' | 'overdue' | 'today' | 'tomorrow' | 'default';
  * `Math.round((due − today) / 86400000)`, and the localized fallback uses
  * `toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })`.
  */
-export function formatDue(
-  due: string | null,
-  today: string,
-): { text: string; tone: DueTone } {
+export function formatDue(due: string | null, today: string): { text: string; tone: DueTone } {
   if (!due) return { text: 'Sem prazo', tone: 'none' };
   const d = new Date(due + 'T00:00:00');
   const t = new Date(today + 'T00:00:00');
@@ -441,9 +436,7 @@ export function markSingleActive<T>(
 /**
  * A navigation target in the sidebar: either a Menu view or a Project entry.
  */
-export type NavItem =
-  | { kind: 'view'; view: View }
-  | { kind: 'project'; project: string };
+export type NavItem = { kind: 'view'; view: View } | { kind: 'project'; project: string };
 
 /**
  * The current navigation selection. An active project overrides the view

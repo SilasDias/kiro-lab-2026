@@ -20,18 +20,14 @@
 //
 // Requirements: 13.1, 13.3, 13.4, 13.5
 
-import index from "./index.html";
-import {
-  createApp,
-  BACKEND_UNREACHABLE_MESSAGE,
-  type RoutePlugin,
-} from "./backend/app";
-import { authRoutes } from "./backend/auth-routes";
-import { taskRoutes } from "./backend/tasks";
-import { projectRoutes } from "./backend/projects";
-import { notificationRoutes } from "./backend/notifications";
-import { getDatabase } from "./backend/db";
-import { isSeeded, seedDatabase } from "./backend/seed";
+import index from './index.html';
+import { createApp, BACKEND_UNREACHABLE_MESSAGE, type RoutePlugin } from './backend/app';
+import { authRoutes } from './backend/auth-routes';
+import { taskRoutes } from './backend/tasks';
+import { projectRoutes } from './backend/projects';
+import { notificationRoutes } from './backend/notifications';
+import { getDatabase } from './backend/db';
+import { isSeeded, seedDatabase } from './backend/seed';
 
 // --- Configuration -----------------------------------------------------------
 
@@ -42,7 +38,7 @@ const PORT = Number(process.env.PORT ?? 3100);
  * Development mode enables Bun's detailed bundling errors and hot reloading.
  * Defaults on unless `NODE_ENV === "production"`.
  */
-const IS_DEV = process.env.NODE_ENV !== "production";
+const IS_DEV = process.env.NODE_ENV !== 'production';
 
 /**
  * Maximum time the server waits for the mounted backend to produce a response
@@ -58,12 +54,7 @@ const BACKEND_TIMEOUT_MS = 5000;
  * `createApp` installs the centralized error contract and the `/api/health`
  * probe; the auth/task/project/notification plugins supply the data endpoints.
  */
-const backend: RoutePlugin = createApp([
-  authRoutes,
-  taskRoutes,
-  projectRoutes,
-  notificationRoutes,
-]);
+const backend: RoutePlugin = createApp([authRoutes, taskRoutes, projectRoutes, notificationRoutes]);
 
 /**
  * Initialize the shared database and seed the prototype's sample data on first
@@ -84,7 +75,7 @@ async function initBackend(): Promise<void> {
 class BackendTimeoutError extends Error {
   constructor() {
     super(BACKEND_UNREACHABLE_MESSAGE);
-    this.name = "BackendTimeoutError";
+    this.name = 'BackendTimeoutError';
   }
 }
 
@@ -92,7 +83,7 @@ class BackendTimeoutError extends Error {
 function backendUnreachableResponse(): Response {
   return new Response(JSON.stringify({ error: BACKEND_UNREACHABLE_MESSAGE }), {
     status: 503,
-    headers: { "content-type": "application/json" },
+    headers: { 'content-type': 'application/json' },
   });
 }
 
@@ -129,10 +120,10 @@ const server = Bun.serve({
   development: IS_DEV ? { hmr: true, console: true } : false,
   routes: {
     // Route the REST API to the mounted Elysia app (R13.4, R13.5).
-    "/api/*": (request: Request) => routeToBackend(request),
+    '/api/*': (request: Request) => routeToBackend(request),
     // Serve the bundled front end for all other paths via the HTML import.
     // Bun bundles the referenced `.tsx`/CSS modules on demand (R13.1).
-    "/*": index,
+    '/*': index,
   },
   /**
    * Server-level error hook. In development Bun renders detailed bundling
@@ -140,10 +131,10 @@ const server = Bun.serve({
    * response instead of an empty socket close (R13.3).
    */
   error(error: Error): Response {
-    console.error("[server] request error:", error);
+    console.error('[server] request error:', error);
     return new Response(
-      JSON.stringify({ error: "Erro interno do servidor.", detail: error.message }),
-      { status: 500, headers: { "content-type": "application/json" } },
+      JSON.stringify({ error: 'Erro interno do servidor.', detail: error.message }),
+      { status: 500, headers: { 'content-type': 'application/json' } },
     );
   },
 });

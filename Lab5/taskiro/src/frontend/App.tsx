@@ -29,33 +29,31 @@
  *
  * All colors come from the OKLCH theme utilities; icons are `lucide-react`.
  */
-TextDecoderStream
-import { useState, type FormEvent } from "react";
-import { Loader2, LockKeyhole, LogIn, Mail } from "lucide-react";
+import { useState, type FormEvent } from 'react';
+import { Loader2, LockKeyhole, LogIn, Mail } from 'lucide-react';
 
-import { AuthProvider, useAuth } from "@/state/AuthContext";
-import { DataProvider, useData } from "@/state/DataContext";
+import { AuthProvider, useAuth } from '@/state/AuthContext';
+import { DataProvider, useData } from '@/state/DataContext';
 
-import { Sidebar } from "@/components/Sidebar";
-import { Header } from "@/components/Header";
-import { FilterBar } from "@/components/FilterBar";
-import { TaskList } from "@/components/TaskList";
-import { BoardView } from "@/components/BoardView";
-import { EmptyState } from "@/components/EmptyState";
-import { TaskDialog } from "@/components/TaskDialog";
-import { ProjectDialog } from "@/components/ProjectDialog";
-import { NotificationsPanel } from "@/components/NotificationsPanel";
-import { UserMenu } from "@/components/UserMenu";
-import { ConfirmDialog, useConfirmDialog } from "@/components/ConfirmDialog";
-import { Toaster, toast } from "@/components/Toaster";
+import { Sidebar } from '@/components/Sidebar';
+import { Header } from '@/components/Header';
+import { FilterBar } from '@/components/FilterBar';
+import { TaskList } from '@/components/TaskList';
+import { BoardView } from '@/components/BoardView';
+import { EmptyState } from '@/components/EmptyState';
+import { TaskDialog } from '@/components/TaskDialog';
+import { ProjectDialog } from '@/components/ProjectDialog';
+import { NotificationsPanel } from '@/components/NotificationsPanel';
+import { UserMenu } from '@/components/UserMenu';
+import { ConfirmDialog, useConfirmDialog } from '@/components/ConfirmDialog';
+import { Toaster, toast } from '@/components/Toaster';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import type { Task } from "@/lib/logic";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import type { Task } from '@/lib/logic';
 
 /** The TasKiro logo, sourced from the absolute kiro.dev URL (R3.1, R20.3). */
-const LOGO_URL =
-  "https://kiro.dev/images/community/events/thumbnails/meetup2.svg";
+const LOGO_URL = 'https://kiro.dev/images/community/events/thumbnails/meetup2.svg';
 
 /**
  * Loading screen shown while a persisted session is being re-validated against
@@ -79,8 +77,8 @@ function LoadingScreen() {
  */
 function LoginScreen() {
   const { login } = useAuth();
-  const [email, setEmail] = useState("ana@taskiro.app");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('ana@taskiro.app');
+  const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,8 +92,7 @@ function LoginScreen() {
       // On success the auth status flips to "authenticated" and the gate
       // swaps in the shell — nothing more to do here.
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Não foi possível entrar.";
+      const message = err instanceof Error ? err.message : 'Não foi possível entrar.';
       setError(message);
       toast.error(message);
     } finally {
@@ -108,27 +105,16 @@ function LoginScreen() {
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-card p-8 shadow-sm">
         {/* Branding (R3.1) */}
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <img
-            src={LOGO_URL}
-            alt="Logo TasKiro"
-            className="h-12 w-12 rounded-xl object-contain"
-          />
+          <img src={LOGO_URL} alt="Logo TasKiro" className="h-12 w-12 rounded-xl object-contain" />
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
-              TasKiro
-            </h1>
-            <p className="text-xs font-medium text-slate-400">
-              Gerenciador de tarefas
-            </p>
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">TasKiro</h1>
+            <p className="text-xs font-medium text-slate-400">Gerenciador de tarefas</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-4" noValidate>
           <div className="grid gap-1.5">
-            <label
-              htmlFor="login-email"
-              className="text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="login-email" className="text-sm font-medium text-slate-700">
               E-mail
             </label>
             <div className="relative">
@@ -147,10 +133,7 @@ function LoginScreen() {
           </div>
 
           <div className="grid gap-1.5">
-            <label
-              htmlFor="login-password"
-              className="text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="login-password" className="text-sm font-medium text-slate-700">
               Senha
             </label>
             <div className="relative">
@@ -217,17 +200,17 @@ function AppShell() {
   /** Guard task deletion behind the confirm dialog (R1.10, R11). */
   const handleDeleteTask = (task: Task) => {
     confirm({
-      title: "Excluir tarefa?",
+      title: 'Excluir tarefa?',
       description: `A tarefa "${task.title}" será removida permanentemente.`,
-      confirmLabel: "Excluir",
+      confirmLabel: 'Excluir',
       destructive: true,
       onConfirm: async () => {
         try {
           await deleteTask(task.id);
           // Task deletion uses the error (rose) toast variant (R11.4).
-          toast.error("Tarefa excluída");
+          toast.error('Tarefa excluída');
         } catch {
-          toast.error("Não foi possível excluir a tarefa");
+          toast.error('Não foi possível excluir a tarefa');
         }
       },
     });
@@ -237,19 +220,19 @@ function AppShell() {
   const handleRequestClearCompleted = (completedCount: number) => {
     const plural = completedCount > 1;
     confirm({
-      title: "Limpar concluídas?",
-      description: `Remover ${completedCount} tarefa${plural ? "s" : ""} concluída${
-        plural ? "s" : ""
+      title: 'Limpar concluídas?',
+      description: `Remover ${completedCount} tarefa${plural ? 's' : ''} concluída${
+        plural ? 's' : ''
       }?`,
-      confirmLabel: "Limpar",
+      confirmLabel: 'Limpar',
       destructive: true,
       onConfirm: async () => {
         try {
           await clearCompleted();
           // Completed-clear success uses the success (emerald) variant (R11.4).
-          toast.success("Tarefas concluídas removidas.");
+          toast.success('Tarefas concluídas removidas.');
         } catch {
-          toast.error("Não foi possível limpar as tarefas.");
+          toast.error('Não foi possível limpar as tarefas.');
         }
       },
     });
@@ -276,7 +259,7 @@ function AppShell() {
         <main className="flex-1 px-4 py-5 sm:px-6">
           {isEmpty ? (
             <EmptyState onNewTask={openCreateTask} />
-          ) : layout === "list" ? (
+          ) : layout === 'list' ? (
             <TaskList onEdit={openEditTask} onDelete={handleDeleteTask} />
           ) : (
             <BoardView onEdit={openEditTask} onDelete={handleDeleteTask} />
@@ -294,10 +277,7 @@ function AppShell() {
 
       {/* Overlays / singletons mounted once for the whole shell. */}
       <TaskDialog />
-      <ProjectDialog
-        open={projectDialogOpen}
-        onOpenChange={setProjectDialogOpen}
-      />
+      <ProjectDialog open={projectDialogOpen} onOpenChange={setProjectDialogOpen} />
       <NotificationsPanel />
       <ConfirmDialog {...dialogProps} />
     </div>
@@ -311,7 +291,7 @@ function AppShell() {
 function AuthGate() {
   const { status, isAuthenticated } = useAuth();
 
-  if (status === "loading") return <LoadingScreen />;
+  if (status === 'loading') return <LoadingScreen />;
   if (!isAuthenticated) return <LoginScreen />;
   return <AppShell />;
 }

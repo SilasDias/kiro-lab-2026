@@ -33,18 +33,14 @@
  * raw literals (Requirements 14.3, 14.7).
  */
 
-import { useEffect } from "react";
-import { BellOff } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect } from 'react';
+import { BellOff } from 'lucide-react';
+import { toast } from 'sonner';
 
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { hasUnread } from "@/lib/logic";
-import { useData } from "@/state/DataContext";
+import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { hasUnread } from '@/lib/logic';
+import { useData } from '@/state/DataContext';
 
 /**
  * Format the elapsed time since an ISO-8601 timestamp as a pt-BR relative
@@ -54,10 +50,10 @@ import { useData } from "@/state/DataContext";
  */
 function relativeTime(iso: string, now: number): string {
   const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "";
+  if (Number.isNaN(then)) return '';
   const diffMs = Math.max(0, now - then);
   const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "agora";
+  if (minutes < 1) return 'agora';
   if (minutes < 60) return `há ${minutes} min`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `há ${hours} h`;
@@ -66,9 +62,9 @@ function relativeTime(iso: string, now: number): string {
   const weeks = Math.floor(days / 7);
   if (weeks < 5) return `há ${weeks} sem`;
   const months = Math.floor(days / 30);
-  if (months < 12) return `há ${months} ${months > 1 ? "meses" : "mês"}`;
+  if (months < 12) return `há ${months} ${months > 1 ? 'meses' : 'mês'}`;
   const years = Math.floor(days / 365);
-  return `há ${years} ${years > 1 ? "anos" : "ano"}`;
+  return `há ${years} ${years > 1 ? 'anos' : 'ano'}`;
 }
 
 export interface NotificationsPanelProps {
@@ -105,11 +101,11 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
   async function handleMarkAll() {
     try {
       await markAllNotificationsRead();
-      toast.success("Notificações marcadas como lidas.");
+      toast.success('Notificações marcadas como lidas.');
     } catch {
       // The context already reverted the optimistic read flip (R10.7); surface
       // the failure to the user.
-      toast.error("Não foi possível atualizar as notificações.");
+      toast.error('Não foi possível atualizar as notificações.');
     }
   }
 
@@ -119,17 +115,14 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
           carries no size and ignores pointer events so it never intercepts
           clicks on the header (R12.3). */}
       <PopoverAnchor asChild>
-        <span
-          aria-hidden="true"
-          className="pointer-events-none fixed right-4 top-16 h-0 w-0"
-        />
+        <span aria-hidden="true" className="pointer-events-none fixed right-4 top-16 h-0 w-0" />
       </PopoverAnchor>
 
       <PopoverContent
         align="end"
         sideOffset={8}
         className={cn(
-          "w-80 overflow-hidden rounded-xl border border-slate-200 bg-card p-0 shadow-xl",
+          'w-80 overflow-hidden rounded-xl border border-slate-200 bg-card p-0 shadow-xl',
           className,
         )}
         aria-label="Notificações"
@@ -161,23 +154,18 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
             {orderedNotifications.map((n) => (
               <div
                 key={n.id}
-                className={cn(
-                  "flex items-start gap-3 px-4 py-3",
-                  n.read ? "" : "bg-brand-50/40",
-                )}
+                className={cn('flex items-start gap-3 px-4 py-3', n.read ? '' : 'bg-brand-50/40')}
               >
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "mt-1 h-2 w-2 shrink-0 rounded-full",
-                    n.read ? "bg-slate-300" : "bg-brand-500",
+                    'mt-1 h-2 w-2 shrink-0 rounded-full',
+                    n.read ? 'bg-slate-300' : 'bg-brand-500',
                   )}
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-slate-700">{n.text}</p>
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    {relativeTime(n.time, now)}
-                  </p>
+                  <p className="mt-0.5 text-xs text-slate-400">{relativeTime(n.time, now)}</p>
                 </div>
               </div>
             ))}

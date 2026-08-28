@@ -18,19 +18,19 @@
  * shell (12.1) / Sidebar (11.1) can drop it in directly.
  */
 
-import { ChevronUp, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { ChevronUp, LogOut, Settings, User as UserIcon } from 'lucide-react';
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { initials } from "@/lib/utils";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/state/AuthContext";
+} from '@/components/ui/dropdown-menu';
+import { initials } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/state/AuthContext';
 
 export interface UserMenuProps {
   className?: string;
@@ -54,7 +54,7 @@ export function UserMenu({ className }: UserMenuProps) {
           type="button"
           aria-label="Abrir menu do usuário"
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+            'flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
             className,
           )}
         >
@@ -67,9 +67,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <span className="block truncate text-sm font-semibold text-foreground">
               {user.displayName}
             </span>
-            <span className="block truncate text-xs text-muted-foreground">
-              {user.email}
-            </span>
+            <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
           </span>
           <ChevronUp className="size-4 text-muted-foreground" />
         </button>

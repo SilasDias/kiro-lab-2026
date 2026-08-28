@@ -34,9 +34,9 @@
 // DTO field names back to column names and `done` back to 0/1 before handing
 // the values to the scoping layer (`insertOwned` / `updateOwned`).
 
-import { Elysia, t } from "elysia";
-import { NotFoundError, BackendUnreachableError, requireAuth } from "./app";
-import { getDatabase, type Priority, type Status, type TaskRow } from "./db";
+import { Elysia, t } from 'elysia';
+import { NotFoundError, BackendUnreachableError, requireAuth } from './app';
+import { getDatabase, type Priority, type Status, type TaskRow } from './db';
 import {
   type ColumnValues,
   deleteOwned,
@@ -44,7 +44,7 @@ import {
   insertOwned,
   listOwned,
   updateOwned,
-} from "./scoping";
+} from './scoping';
 
 // --- Wire DTO ----------------------------------------------------------------
 
@@ -87,23 +87,15 @@ export function rowToDto(row: TaskRow): TaskDto {
 /** ISO 'YYYY-MM-DD' calendar date, or null when no due date is set. */
 const DueSchema = t.Union([
   t.String({
-    pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+    pattern: '^\\d{4}-\\d{2}-\\d{2}$',
     description: "ISO date 'YYYY-MM-DD'",
   }),
   t.Null(),
 ]);
 
-const PrioritySchema = t.Union([
-  t.Literal("low"),
-  t.Literal("medium"),
-  t.Literal("high"),
-]);
+const PrioritySchema = t.Union([t.Literal('low'), t.Literal('medium'), t.Literal('high')]);
 
-const StatusSchema = t.Union([
-  t.Literal("todo"),
-  t.Literal("doing"),
-  t.Literal("done"),
-]);
+const StatusSchema = t.Union([t.Literal('todo'), t.Literal('doing'), t.Literal('done')]);
 
 /** POST body: title required; everything else optional with sane defaults. */
 const CreateTaskSchema = t.Object({
@@ -139,11 +131,11 @@ type UpdateTaskBody = typeof UpdateTaskSchema.static;
 function createColumns(body: CreateTaskBody): ColumnValues {
   return {
     title: body.title,
-    description: body.desc ?? "",
+    description: body.desc ?? '',
     due: body.due ?? null,
     priority: body.priority,
     project_id: body.project ?? null,
-    status: "todo",
+    status: 'todo',
     done: 0,
   };
 }
@@ -173,23 +165,18 @@ function patchColumns(body: UpdateTaskBody): ColumnValues {
  * `createApp([... , taskRoutes, ...])`. `requireAuth` resolves the
  * authenticated `user` into context; every handler scopes by `user.id`.
  */
-export const taskRoutes = new Elysia({ prefix: "/api/tasks" })
+export const taskRoutes = new Elysia({ prefix: '/api/tasks' })
   .use(requireAuth)
   // GET /api/tasks → the authenticated user's tasks (R16.2, R19.1).
-  .get("/", ({ user }) => {
-    const rows = listOwned<TaskRow>(getDatabase(), "tasks", user.id);
+  .get('/', ({ user }) => {
+    const rows = listOwned<TaskRow>(getDatabase(), 'tasks', user.id);
     return rows.map(rowToDto);
   })
   // POST /api/tasks → 201 created, owned by the session user (R16.2, R16.7, R19.3).
   .post(
-    "/",
+    '/',
     ({ user, body, set }) => {
-      const row = insertOwned<TaskRow>(
-        getDatabase(),
-        "tasks",
-        user.id,
-        createColumns(body),
-      );
+      const row = insertOwned<TaskRow>(getDatabase(), 'tasks', user.id, createColumns(body));
       // The guard guarantees an authenticated user, so a null result here means
       // the write did not return a row — surface it as a backend failure.
       if (row === null) throw new BackendUnreachableError();
@@ -199,18 +186,18 @@ export const taskRoutes = new Elysia({ prefix: "/api/tasks" })
     { body: CreateTaskSchema },
   )
   // GET /api/tasks/:id → 200 owned task, else 404 (R16.6, R19.5).
-  .get("/:id", ({ user, params }) => {
-    const row = getOwned<TaskRow>(getDatabase(), "tasks", user.id, params.id);
+  .get('/:id', ({ user, params }) => {
+    const row = getOwned<TaskRow>(getDatabase(), 'tasks', user.id, params.id);
     if (row === null) throw new NotFoundError();
     return rowToDto(row);
   })
   // PATCH /api/tasks/:id → 200 updated task, else 404 (R16.2, R19.4, R19.5).
   .patch(
-    "/:id",
+    '/:id',
     ({ user, params, body }) => {
       const row = updateOwned<TaskRow>(
         getDatabase(),
-        "tasks",
+        'tasks',
         user.id,
         params.id,
         patchColumns(body),
@@ -221,8 +208,8 @@ export const taskRoutes = new Elysia({ prefix: "/api/tasks" })
     { body: UpdateTaskSchema },
   )
   // DELETE /api/tasks/:id → 200 { ok: true }, else 404 (R16.2, R19.5).
-  .delete("/:id", ({ user, params }) => {
-    const deleted = deleteOwned(getDatabase(), "tasks", user.id, params.id);
+  .delete('/:id', ({ user, params }) => {
+    const deleted = deleteOwned(getDatabase(), 'tasks', user.id, params.id);
     if (!deleted) throw new NotFoundError();
     return { ok: true as const };
   });

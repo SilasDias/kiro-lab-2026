@@ -26,7 +26,7 @@ import {
   useMemo,
   useState,
   type ReactNode,
-} from "react";
+} from 'react';
 import {
   api,
   UnauthorizedError,
@@ -35,7 +35,7 @@ import {
   type Notification,
   type Project,
   type UpdateTaskInput,
-} from "../lib/api";
+} from '../lib/api';
 import {
   boardColumns,
   filterByPriority,
@@ -53,14 +53,14 @@ import {
   type Status,
   type Task,
   type View,
-} from "../lib/logic";
-import { useAuth } from "./AuthContext";
+} from '../lib/logic';
+import { useAuth } from './AuthContext';
 
 /** The display mode of the task area. */
-export type Layout = "list" | "board";
+export type Layout = 'list' | 'board';
 
 /** The priority filter selection (`'all'` is the no-op default). */
-export type PriorityFilter = Priority | "all";
+export type PriorityFilter = Priority | 'all';
 
 export interface DataContextValue {
   // --- Raw data ---
@@ -141,8 +141,8 @@ const DataContext = createContext<DataContextValue | null>(null);
 function todayIso(): string {
   const d = new Date();
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
 
@@ -159,12 +159,12 @@ export function DataProvider({ children }: DataProviderProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // UI state
-  const [view, setView] = useState<View>("all");
+  const [view, setView] = useState<View>('all');
   const [activeProject, setActiveProjectState] = useState<string | null>(null);
-  const [layout, setLayout] = useState<Layout>("list");
-  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
-  const [search, setSearch] = useState<string>("");
-  const [sort, setSort] = useState<SortMode>("due");
+  const [layout, setLayout] = useState<Layout>('list');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
+  const [search, setSearch] = useState<string>('');
+  const [sort, setSort] = useState<SortMode>('due');
 
   // Overlay / shell UI state
   const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false);
@@ -199,17 +199,13 @@ export function DataProvider({ children }: DataProviderProps) {
     setError(null);
     try {
       const [t, p, n] = await guard(() =>
-        Promise.all([
-          api.listTasks(),
-          api.listProjects(),
-          api.listNotifications(),
-        ]),
+        Promise.all([api.listTasks(), api.listProjects(), api.listNotifications()]),
       );
       setTasks(t);
       setProjects(p);
       setNotifications(n);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao carregar dados");
+      setError(err instanceof Error ? err.message : 'Falha ao carregar dados');
       throw err;
     } finally {
       setLoading(false);
@@ -223,7 +219,7 @@ export function DataProvider({ children }: DataProviderProps) {
       setProjects([]);
       setNotifications([]);
       setActiveProjectState(null);
-      setView("all");
+      setView('all');
       setError(null);
       setTaskDialogOpen(false);
       setTaskBeingEdited(null);
@@ -324,9 +320,7 @@ export function DataProvider({ children }: DataProviderProps) {
   const clearCompleted = useCallback(async (): Promise<void> => {
     const completed = tasks.filter((t) => t.done);
     if (completed.length === 0) return;
-    await guard(() =>
-      Promise.all(completed.map((t) => api.deleteTask(t.id))),
-    );
+    await guard(() => Promise.all(completed.map((t) => api.deleteTask(t.id))));
     const removedIds = new Set(completed.map((t) => t.id));
     setTasks((prev) => prev.filter((t) => !removedIds.has(t.id)));
   }, [tasks, guard]);
@@ -370,15 +364,9 @@ export function DataProvider({ children }: DataProviderProps) {
     return sortTasks(filtered, sort);
   }, [tasks, activeProject, view, today, search, priorityFilter, sort]);
 
-  const board = useMemo<Record<Status, Task[]>>(
-    () => boardColumns(visibleTasks),
-    [visibleTasks],
-  );
+  const board = useMemo<Record<Status, Task[]>>(() => boardColumns(visibleTasks), [visibleTasks]);
 
-  const counts = useMemo<Record<View, number>>(
-    () => viewCounts(tasks, today),
-    [tasks, today],
-  );
+  const counts = useMemo<Record<View, number>>(() => viewCounts(tasks, today), [tasks, today]);
 
   const projectCounts = useMemo<Record<string, number>>(() => {
     const result: Record<string, number> = {};
@@ -478,7 +466,7 @@ export function DataProvider({ children }: DataProviderProps) {
 export function useData(): DataContextValue {
   const ctx = useContext(DataContext);
   if (ctx === null) {
-    throw new Error("useData must be used within a DataProvider");
+    throw new Error('useData must be used within a DataProvider');
   }
   return ctx;
 }

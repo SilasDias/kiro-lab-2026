@@ -14,10 +14,10 @@
 //
 // Requirements: 16.3, 16.7, 19.1, 19.3
 
-import { Elysia, t } from "elysia";
-import { requireAuth } from "./app";
-import { getDatabase, type ProjectRow } from "./db";
-import { insertOwned, listOwned } from "./scoping";
+import { Elysia, t } from 'elysia';
+import { requireAuth } from './app';
+import { getDatabase, type ProjectRow } from './db';
+import { insertOwned, listOwned } from './scoping';
 
 /** The project shape returned over the wire (mirrors frontend `api.ts`). */
 export interface Project {
@@ -48,18 +48,18 @@ const createProjectBody = t.Object({
 /**
  * Project route plugin. Mount via `createApp([..., projectRoutes])`.
  */
-export const projectRoutes = new Elysia({ prefix: "/api/projects" })
+export const projectRoutes = new Elysia({ prefix: '/api/projects' })
   .use(requireAuth)
   // GET /api/projects → the authenticated user's projects (R16.3, R19.1).
-  .get("/", ({ user }): Project[] =>
-    listOwned<ProjectRow>(getDatabase(), "projects", user.id).map(rowToDto),
+  .get('/', ({ user }): Project[] =>
+    listOwned<ProjectRow>(getDatabase(), 'projects', user.id).map(rowToDto),
   )
   // POST /api/projects → create a project owned by the session user (R19.3).
   .post(
-    "/",
+    '/',
     ({ user, body, set }): Project => {
       const name = body.name.trim();
-      const created = insertOwned<ProjectRow>(getDatabase(), "projects", user.id, {
+      const created = insertOwned<ProjectRow>(getDatabase(), 'projects', user.id, {
         name,
         color: body.color,
       });
