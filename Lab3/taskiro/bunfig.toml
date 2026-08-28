@@ -1,0 +1,8 @@
+# Bun configuration for TasKiro (Requirement 13.6)
+#
+# Registers bun-plugin-tailwind so the Bun Fullstack Dev Server compiles
+# Tailwind CSS v4 when bundling the front end served via HTML imports.
+# No Node.js / Vite / Webpack tooling participates (Requirement 13.2).
+
+[serve.static]
+plugins = ["bun-plugin-tailwind"]
