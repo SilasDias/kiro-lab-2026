@@ -8,7 +8,8 @@
       "action": {
         "type": "agent",
         "prompt": "Um arquivo TypeScript/TSX acabou de ser salvo. Revise o arquivo alterado e forneça um retorno objetivo e acionável focado em:\n\n1. Padrões de código: consistência com o restante do projeto (nomes, estrutura, imports, tipagem estrita, ausência de `any` desnecessário, uso adequado de tipos/interfaces).\n2. Tratamento de erros: verificar try/catch onde apropriado, tratamento de Promises rejeitadas, validação de entradas, ausência de erros silenciados e mensagens de erro úteis.\n3. Melhorias sugeridas: legibilidade, reuso, remoção de código morto, edge cases não tratados e potenciais bugs.\n\nRegras:\n- Analise apenas o arquivo salvo (e dependências diretas se necessário para entender o contexto).\n- Liste os problemas por severidade (crítico, importante, menor) com o número da linha quando possível.\n- Seja conciso. Não reescreva o arquivo inteiro; sugira apenas os trechos relevantes.\n- Não faça alterações automáticas: apenas reporte e sugira, a menos que o usuário peça para aplicar."
-      }
+      },
+      "enabled": false
     }
   ]
 }

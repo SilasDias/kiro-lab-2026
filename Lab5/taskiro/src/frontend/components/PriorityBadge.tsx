@@ -10,32 +10,29 @@
  * modifiers of the same token.
  */
 
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import type { Priority } from "@/lib/logic";
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import type { Priority } from '@/lib/logic';
 
 /**
  * Per-priority label and tokenized chip/dot classes. The class strings are
  * static (not interpolated) so Tailwind can detect them at build time.
  */
-const PRIORITY_META: Record<
-  Priority,
-  { label: string; chip: string; dot: string }
-> = {
+const PRIORITY_META: Record<Priority, { label: string; chip: string; dot: string }> = {
   high: {
-    label: "Alta",
-    chip: "bg-priority-high/10 text-priority-high border-priority-high/20",
-    dot: "bg-priority-high",
+    label: 'Alta',
+    chip: 'bg-priority-high/10 text-priority-high border-priority-high/20',
+    dot: 'bg-priority-high',
   },
   medium: {
-    label: "Média",
-    chip: "bg-priority-medium/10 text-priority-medium border-priority-medium/30",
-    dot: "bg-priority-medium",
+    label: 'Média',
+    chip: 'bg-priority-medium/10 text-priority-medium border-priority-medium/30',
+    dot: 'bg-priority-medium',
   },
   low: {
-    label: "Baixa",
-    chip: "bg-priority-low/10 text-priority-low border-priority-low/20",
-    dot: "bg-priority-low",
+    label: 'Baixa',
+    chip: 'bg-priority-low/10 text-priority-low border-priority-low/20',
+    dot: 'bg-priority-low',
   },
 };
 
@@ -49,13 +46,9 @@ export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={cn(
-        "gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium",
-        meta.chip,
-        className,
-      )}
+      className={cn('gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium', meta.chip, className)}
     >
-      <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
+      <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
       {meta.label}
     </Badge>
   );

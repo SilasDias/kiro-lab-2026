@@ -32,30 +32,24 @@ import {
   Plus,
   Sun,
   type LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn, initials } from "@/lib/utils";
-import { isNavItemActive, type View } from "@/lib/logic";
-import { useAuth } from "@/state/AuthContext";
-import { useData } from "@/state/DataContext";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { cn, initials } from '@/lib/utils';
+import { isNavItemActive, type View } from '@/lib/logic';
+import { useAuth } from '@/state/AuthContext';
+import { useData } from '@/state/DataContext';
 
 /** The TasKiro logo, sourced from the absolute kiro.dev URL (R3.1, R20.3). */
-const LOGO_URL =
-  "https://kiro.dev/images/community/events/thumbnails/meetup2.svg";
+const LOGO_URL = 'https://kiro.dev/images/community/events/thumbnails/meetup2.svg';
 
 /** The four Menu Views with their pt-BR labels and prototype icons (R3.2). */
 const VIEWS: ReadonlyArray<{ view: View; label: string; icon: LucideIcon }> = [
-  { view: "all", label: "Todas as tarefas", icon: LayoutList },
-  { view: "today", label: "Hoje", icon: Sun },
-  { view: "upcoming", label: "Próximas", icon: CalendarClock },
-  { view: "completed", label: "Concluídas", icon: CheckCheck },
+  { view: 'all', label: 'Todas as tarefas', icon: LayoutList },
+  { view: 'today', label: 'Hoje', icon: Sun },
+  { view: 'upcoming', label: 'Próximas', icon: CalendarClock },
+  { view: 'completed', label: 'Concluídas', icon: CheckCheck },
 ];
 
 export interface SidebarProps {
@@ -84,15 +78,8 @@ function SidebarContent({
   onOpenUserMenu?: () => void;
 }) {
   const { user } = useAuth();
-  const {
-    view,
-    activeProject,
-    counts,
-    projects,
-    projectCounts,
-    setView,
-    setActiveProject,
-  } = useData();
+  const { view, activeProject, counts, projects, projectCounts, setView, setActiveProject } =
+    useData();
 
   const selection = { view, activeProject };
 
@@ -107,25 +94,17 @@ function SidebarContent({
     onNavigate?.();
   };
 
-  const displayName = user?.displayName ?? "";
-  const email = user?.email ?? "";
+  const displayName = user?.displayName ?? '';
+  const email = user?.email ?? '';
 
   return (
     <div className="flex h-full flex-col">
       {/* Logo / branding (R3.1) */}
       <div className="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border px-5">
-        <img
-          src={LOGO_URL}
-          alt="Logo TasKiro"
-          className="h-9 w-9 rounded-lg object-contain"
-        />
+        <img src={LOGO_URL} alt="Logo TasKiro" className="h-9 w-9 rounded-lg object-contain" />
         <div className="leading-tight">
-          <p className="text-lg font-extrabold tracking-tight text-slate-900">
-            TasKiro
-          </p>
-          <p className="text-[11px] font-medium text-slate-400">
-            Gerenciador de tarefas
-          </p>
+          <p className="text-lg font-extrabold tracking-tight text-slate-900">TasKiro</p>
+          <p className="text-[11px] font-medium text-slate-400">Gerenciador de tarefas</p>
         </div>
       </div>
 
@@ -136,19 +115,17 @@ function SidebarContent({
           Menu
         </p>
         {VIEWS.map(({ view: v, label, icon: Icon }) => {
-          const active = isNavItemActive(selection, { kind: "view", view: v });
+          const active = isNavItemActive(selection, { kind: 'view', view: v });
           return (
             <button
               key={v}
               type="button"
               data-view={v}
-              aria-current={active ? "page" : undefined}
+              aria-current={active ? 'page' : undefined}
               onClick={() => handleSelectView(v)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
-                active
-                  ? "bg-brand-50 text-brand-700"
-                  : "text-slate-600 hover:bg-slate-100",
+                'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
+                active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100',
               )}
             >
               <Icon className="h-[18px] w-[18px]" />
@@ -167,7 +144,7 @@ function SidebarContent({
         <div className="space-y-1">
           {projects.map((project) => {
             const active = isNavItemActive(selection, {
-              kind: "project",
+              kind: 'project',
               project: project.id,
             });
             return (
@@ -175,25 +152,19 @@ function SidebarContent({
                 key={project.id}
                 type="button"
                 data-project={project.id}
-                aria-current={active ? "page" : undefined}
+                aria-current={active ? 'page' : undefined}
                 onClick={() => handleSelectProject(project.id)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
-                  active
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-slate-100",
+                  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
+                  active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100',
                 )}
               >
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ background: project.color }}
                 />
-                <span className="flex-1 truncate text-left">
-                  {project.name}
-                </span>
-                <span className="text-xs text-slate-400">
-                  {projectCounts[project.id] ?? 0}
-                </span>
+                <span className="flex-1 truncate text-left">{project.name}</span>
+                <span className="text-xs text-slate-400">{projectCounts[project.id] ?? 0}</span>
               </button>
             );
           })}
@@ -223,9 +194,7 @@ function SidebarContent({
             </AvatarFallback>
           </Avatar>
           <span className="flex-1 text-left leading-tight">
-            <span className="block text-sm font-semibold text-slate-800">
-              {displayName}
-            </span>
+            <span className="block text-sm font-semibold text-slate-800">{displayName}</span>
             <span className="block text-xs text-slate-400">{email}</span>
           </span>
           <ChevronUp className="h-4 w-4 text-slate-400" />
@@ -249,10 +218,7 @@ export function Sidebar({
     <>
       {/* Desktop: fixed left panel (R2.3, R3.1). Off-canvas below lg. */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <SidebarContent
-          onNewProject={onNewProject}
-          onOpenUserMenu={onOpenUserMenu}
-        />
+        <SidebarContent onNewProject={onNewProject} onOpenUserMenu={onOpenUserMenu} />
       </aside>
 
       {/* Mobile: off-canvas Sheet with a slate-900/40 dim (R2.5–2.7). */}

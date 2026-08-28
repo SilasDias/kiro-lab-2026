@@ -5,8 +5,6 @@ node_modules/
 .DS_Store
 dist/
 *.log
-echo "node_modules/
-*.db
-.DS_Store
 .env
-" >> .gitignore
+.env.*
+!.env.example

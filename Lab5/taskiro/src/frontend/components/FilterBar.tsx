@@ -20,26 +20,26 @@
  *    completed-task count so the dialog can render the prototype's message.
  */
 
-import { ArrowDownUp, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowDownUp, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
-import { cn } from "@/lib/utils";
-import { useData, type PriorityFilter } from "@/state/DataContext";
-import type { SortMode } from "@/lib/logic";
+import { cn } from '@/lib/utils';
+import { useData, type PriorityFilter } from '@/state/DataContext';
+import type { SortMode } from '@/lib/logic';
 
 /** Priority pills in the prototype's left-to-right order with their pt-BR labels. */
 const PRIORITY_FILTERS: ReadonlyArray<{ value: PriorityFilter; label: string }> = [
-  { value: "all", label: "Todas" },
-  { value: "high", label: "Alta" },
-  { value: "medium", label: "Média" },
-  { value: "low", label: "Baixa" },
+  { value: 'all', label: 'Todas' },
+  { value: 'high', label: 'Alta' },
+  { value: 'medium', label: 'Média' },
+  { value: 'low', label: 'Baixa' },
 ];
 
 /** Sort-control label per mode (prototype's `sortOptions` labels). */
 const SORT_LABELS: Record<SortMode, string> = {
-  due: "Ordenar: Prazo",
-  priority: "Ordenar: Prioridade",
-  title: "Ordenar: Título",
+  due: 'Ordenar: Prazo',
+  priority: 'Ordenar: Prioridade',
+  title: 'Ordenar: Título',
 };
 
 export interface FilterBarProps {
@@ -57,14 +57,14 @@ export function FilterBar({ onRequestClearCompleted }: FilterBarProps) {
   const handleSort = () => {
     cycleSort();
     // Mirror the prototype's feedback when the sort mode changes (R11.4).
-    toast.info("Ordenação atualizada.");
+    toast.info('Ordenação atualizada.');
   };
 
   const handleClearCompleted = () => {
     const completedCount = tasks.filter((t) => t.done).length;
     if (completedCount === 0) {
       // No completed tasks: info toast, no confirmation, no changes (R5.10).
-      toast.info("Não há tarefas concluídas.");
+      toast.info('Não há tarefas concluídas.');
       return;
     }
     // At least one completed task: request confirmation before removing (R5.7).
@@ -87,10 +87,10 @@ export function FilterBar({ onRequestClearCompleted }: FilterBarProps) {
             aria-pressed={active}
             onClick={() => setPriorityFilter(value)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition",
+              'rounded-full border px-3 py-1 text-xs font-medium transition',
               active
-                ? "border-brand-600 bg-brand-600 text-primary-foreground"
-                : "border-slate-200 text-slate-600 hover:bg-slate-50",
+                ? 'border-brand-600 bg-brand-600 text-primary-foreground'
+                : 'border-slate-200 text-slate-600 hover:bg-slate-50',
             )}
           >
             {label}

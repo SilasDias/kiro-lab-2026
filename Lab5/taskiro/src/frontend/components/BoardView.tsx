@@ -15,12 +15,12 @@
  * `doing`, and the emerald priority token for `done`.
  */
 
-import { CheckCircle2, Circle, Loader } from "lucide-react";
-import type { ComponentType } from "react";
+import { CheckCircle2, Circle, Loader } from 'lucide-react';
+import type { ComponentType } from 'react';
 
-import { TaskCard } from "@/components/TaskCard";
-import { useData } from "@/state/DataContext";
-import { boardColumns, type Status, type Task } from "@/lib/logic";
+import { TaskCard } from '@/components/TaskCard';
+import { useData } from '@/state/DataContext';
+import { boardColumns, type Status, type Task } from '@/lib/logic';
 
 interface ColumnMeta {
   key: Status;
@@ -34,13 +34,13 @@ interface ColumnMeta {
  * lucide-react icons, and tokenized accent classes.
  */
 const COLUMNS: ColumnMeta[] = [
-  { key: "todo", label: "A fazer", Icon: Circle, accent: "text-slate-500" },
-  { key: "doing", label: "Em progresso", Icon: Loader, accent: "text-brand-600" },
+  { key: 'todo', label: 'A fazer', Icon: Circle, accent: 'text-slate-500' },
+  { key: 'doing', label: 'Em progresso', Icon: Loader, accent: 'text-brand-600' },
   {
-    key: "done",
-    label: "Concluído",
+    key: 'done',
+    label: 'Concluído',
     Icon: CheckCircle2,
-    accent: "text-priority-low",
+    accent: 'text-priority-low',
   },
 ];
 
@@ -66,10 +66,7 @@ export function BoardView({ tasks, onEdit, onDelete }: BoardViewProps) {
       {COLUMNS.map(({ key, label, Icon, accent }) => {
         const items = columns[key];
         return (
-          <div
-            key={key}
-            className="flex flex-col rounded-xl border border-slate-200 bg-slate-50"
-          >
+          <div key={key} className="flex flex-col rounded-xl border border-slate-200 bg-slate-50">
             <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
               <Icon className={`h-4 w-4 ${accent}`} />
               <h3 className="text-sm font-semibold text-slate-700">{label}</h3>
@@ -80,12 +77,7 @@ export function BoardView({ tasks, onEdit, onDelete }: BoardViewProps) {
             <div className="min-h-[120px] flex-1 space-y-3 p-3">
               {items.length > 0 ? (
                 items.map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
+                  <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} />
                 ))
               ) : (
                 <p className="py-6 text-center text-xs text-slate-400">Vazio</p>

@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Merge conditional class names and resolve Tailwind conflicts.
@@ -14,4 +14,4 @@ export function cn(...inputs: ClassValue[]) {
  * (R3.6). `logic.ts` owns the implementation; `utils.ts` re-exports it so
  * existing `import { initials } from "./utils"` call sites keep working.
  */
-export { initials } from "./logic";
+export { initials } from './logic';

@@ -25,28 +25,28 @@
  * `DataContext`.
  */
 
-import { Bell, Columns3, List, Menu, Plus, Search } from "lucide-react";
+import { Bell, Columns3, List, Menu, Plus, Search } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { hasUnread, type View } from "@/lib/logic";
-import { useData } from "@/state/DataContext";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { hasUnread, type View } from '@/lib/logic';
+import { useData } from '@/state/DataContext';
 
 /** View → header title (ported verbatim from the prototype's `setViewTitle`). */
 const VIEW_TITLES: Record<View, string> = {
-  all: "Todas as tarefas",
-  today: "Hoje",
-  upcoming: "Próximas",
-  completed: "Concluídas",
+  all: 'Todas as tarefas',
+  today: 'Hoje',
+  upcoming: 'Próximas',
+  completed: 'Concluídas',
 };
 
 /** View → header subtitle (ported verbatim from the prototype's `setViewTitle`). */
 const VIEW_SUBTITLES: Record<View, string> = {
-  all: "Gerencie tudo em um só lugar",
-  today: "Foque no que importa hoje",
-  upcoming: "Planeje seus próximos dias",
-  completed: "Tudo que você já finalizou",
+  all: 'Gerencie tudo em um só lugar',
+  today: 'Foque no que importa hoje',
+  upcoming: 'Planeje seus próximos dias',
+  completed: 'Tudo que você já finalizou',
 };
 
 export function Header() {
@@ -71,8 +71,8 @@ export function Header() {
   let subtitle: string;
   if (activeProject !== null) {
     const project = projects.find((p) => p.id === activeProject);
-    title = project ? project.name : "Projeto";
-    subtitle = "Tarefas do projeto";
+    title = project ? project.name : 'Projeto';
+    subtitle = 'Tarefas do projeto';
   } else {
     title = VIEW_TITLES[view];
     subtitle = VIEW_SUBTITLES[view];
@@ -94,12 +94,8 @@ export function Header() {
 
       {/* View title + subtitle (R4.1, R4.2) */}
       <div className="min-w-0">
-        <h1 className="truncate text-lg font-bold leading-tight text-slate-900">
-          {title}
-        </h1>
-        <p className="hidden truncate text-xs text-slate-400 sm:block">
-          {subtitle}
-        </p>
+        <h1 className="truncate text-lg font-bold leading-tight text-slate-900">{title}</h1>
+        <p className="hidden truncate text-xs text-slate-400 sm:block">{subtitle}</p>
       </div>
 
       {/* Search (R4.3, R4.4) */}
@@ -119,30 +115,30 @@ export function Header() {
       <div className="ml-auto hidden items-center rounded-lg bg-slate-100 p-0.5 sm:flex md:ml-0">
         <button
           type="button"
-          onClick={() => setLayout("list")}
+          onClick={() => setLayout('list')}
           title="Lista"
           aria-label="Visualização em lista"
-          aria-pressed={layout === "list"}
+          aria-pressed={layout === 'list'}
           className={cn(
-            "rounded-md p-1.5 transition",
-            layout === "list"
-              ? "bg-card text-brand-600 shadow-sm"
-              : "text-slate-500 hover:text-slate-700",
+            'rounded-md p-1.5 transition',
+            layout === 'list'
+              ? 'bg-card text-brand-600 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700',
           )}
         >
           <List className="h-4 w-4" />
         </button>
         <button
           type="button"
-          onClick={() => setLayout("board")}
+          onClick={() => setLayout('board')}
           title="Quadro"
           aria-label="Visualização em quadro"
-          aria-pressed={layout === "board"}
+          aria-pressed={layout === 'board'}
           className={cn(
-            "rounded-md p-1.5 transition",
-            layout === "board"
-              ? "bg-card text-brand-600 shadow-sm"
-              : "text-slate-500 hover:text-slate-700",
+            'rounded-md p-1.5 transition',
+            layout === 'board'
+              ? 'bg-card text-brand-600 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700',
           )}
         >
           <Columns3 className="h-4 w-4" />

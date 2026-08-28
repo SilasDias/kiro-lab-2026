@@ -7,11 +7,11 @@
 //
 // Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.7, 17.9
 
-import { Database } from "bun:sqlite";
+import { Database } from 'bun:sqlite';
 
 // --- Domain enumerations (mirror the pure logic module) ---
-export type Priority = "low" | "medium" | "high";
-export type Status = "todo" | "doing" | "done";
+export type Priority = 'low' | 'medium' | 'high';
+export type Status = 'todo' | 'doing' | 'done';
 
 // --- Row shapes as stored in SQLite ---
 // `done`/`read` are stored as INTEGER 0/1; helpers in later layers map to booleans.
@@ -56,7 +56,7 @@ export interface SessionRow {
 }
 
 // Default on-disk database path. Use ":memory:" for tests.
-export const DEFAULT_DB_PATH = "taskiro.db";
+export const DEFAULT_DB_PATH = 'taskiro.db';
 
 /**
  * The schema DDL. Foreign keys plus CHECK constraints enforce the prototype's
@@ -136,7 +136,7 @@ export function initSchema(db: Database): void {
  */
 export function createDatabase(path: string = DEFAULT_DB_PATH): Database {
   const db = new Database(path);
-  db.exec("PRAGMA foreign_keys = ON;");
+  db.exec('PRAGMA foreign_keys = ON;');
   initSchema(db);
   return db;
 }

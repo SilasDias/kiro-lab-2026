@@ -33,11 +33,11 @@
  * are used (Requirements 14.3, 14.7).
  */
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-import { DateField } from "@/components/DateField";
-import { Button } from "@/components/ui/button";
+import { DateField } from '@/components/DateField';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -45,32 +45,32 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { isValidTitle, type Priority } from "@/lib/logic";
-import { cn } from "@/lib/utils";
-import { useData } from "@/state/DataContext";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { isValidTitle, type Priority } from '@/lib/logic';
+import { cn } from '@/lib/utils';
+import { useData } from '@/state/DataContext';
 
 /**
  * Sentinel value for the "Sem projeto" option. Radix Select items cannot use an
  * empty string value, so a non-id sentinel represents "no project"; it is
  * mapped back to `null` on submit.
  */
-const NO_PROJECT = "__no_project__";
+const NO_PROJECT = '__no_project__';
 
 /** Priority options in the prototype's order, with their pt-BR labels (R8.3). */
 const PRIORITY_OPTIONS: ReadonlyArray<{ value: Priority; label: string }> = [
-  { value: "high", label: "Alta" },
-  { value: "medium", label: "Média" },
-  { value: "low", label: "Baixa" },
+  { value: 'high', label: 'Alta' },
+  { value: 'medium', label: 'Média' },
+  { value: 'low', label: 'Baixa' },
 ];
 
 export function TaskDialog() {
@@ -87,10 +87,10 @@ export function TaskDialog() {
   const isEditing = taskBeingEdited !== null;
 
   // --- Form state ---
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [due, setDue] = useState("");
-  const [priority, setPriority] = useState<Priority>("medium");
+  const [title, setTitle] = useState('');
+  const [desc, setDesc] = useState('');
+  const [due, setDue] = useState('');
+  const [priority, setPriority] = useState<Priority>('medium');
   const [project, setProject] = useState<string>(NO_PROJECT);
   const [titleError, setTitleError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -102,15 +102,15 @@ export function TaskDialog() {
     if (!taskDialogOpen) return;
     if (taskBeingEdited) {
       setTitle(taskBeingEdited.title);
-      setDesc(taskBeingEdited.desc ?? "");
-      setDue(taskBeingEdited.due ?? "");
+      setDesc(taskBeingEdited.desc ?? '');
+      setDue(taskBeingEdited.due ?? '');
       setPriority(taskBeingEdited.priority);
       setProject(taskBeingEdited.project ?? NO_PROJECT);
     } else {
-      setTitle("");
-      setDesc("");
-      setDue("");
-      setPriority("medium");
+      setTitle('');
+      setDesc('');
+      setDue('');
+      setPriority('medium');
       setProject(activeProject ?? NO_PROJECT);
     }
     setTitleError(false);
@@ -128,7 +128,7 @@ export function TaskDialog() {
     }
 
     const projectId = project === NO_PROJECT ? null : project;
-    const dueValue = due.trim() === "" ? null : due;
+    const dueValue = due.trim() === '' ? null : due;
     const payload = {
       title: title.trim(),
       desc,
@@ -143,18 +143,18 @@ export function TaskDialog() {
         await updateTask(taskBeingEdited.id, payload);
         // Success: close and confirm (R8.6).
         setTaskDialogOpen(false);
-        toast.success("Tarefa atualizada");
+        toast.success('Tarefa atualizada');
       } else {
         await createTask(payload);
         // Success: close and confirm (R8.5). The backend assigns status `todo`
         // and done `false`.
         setTaskDialogOpen(false);
-        toast.success("Tarefa criada");
+        toast.success('Tarefa criada');
       }
     } catch {
       // Failure: keep the dialog open with values retained, surface the error
       // (R8.8). DataContext already routed any 401 to the auth context.
-      toast.error("Não foi possível salvar a tarefa");
+      toast.error('Não foi possível salvar a tarefa');
     } finally {
       setSubmitting(false);
     }
@@ -164,11 +164,9 @@ export function TaskDialog() {
     <Dialog open={taskDialogOpen} onOpenChange={setTaskDialogOpen}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar tarefa" : "Nova tarefa"}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Editar tarefa' : 'Nova tarefa'}</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? "Atualize os detalhes da tarefa."
-              : "Preencha os detalhes da nova tarefa."}
+            {isEditing ? 'Atualize os detalhes da tarefa.' : 'Preencha os detalhes da nova tarefa.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -188,7 +186,7 @@ export function TaskDialog() {
               maxLength={200}
               placeholder="O que precisa ser feito?"
               aria-invalid={titleError}
-              aria-describedby={titleError ? "task-title-error" : undefined}
+              aria-describedby={titleError ? 'task-title-error' : undefined}
               autoFocus
             />
             {titleError ? (
@@ -200,10 +198,7 @@ export function TaskDialog() {
 
           {/* Description (0–2000) (R8.3) */}
           <div className="grid gap-1.5">
-            <label
-              htmlFor="task-desc"
-              className="text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="task-desc" className="text-sm font-medium text-slate-700">
               Descrição
             </label>
             <Textarea
@@ -219,31 +214,18 @@ export function TaskDialog() {
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Due date (R8.3) */}
             <div className="grid gap-1.5">
-              <label
-                htmlFor="task-due"
-                className="text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="task-due" className="text-sm font-medium text-slate-700">
                 Prazo
               </label>
-              <DateField
-                id="task-due"
-                value={due}
-                onChange={(e) => setDue(e.target.value)}
-              />
+              <DateField id="task-due" value={due} onChange={(e) => setDue(e.target.value)} />
             </div>
 
             {/* Priority (Alta/Média/Baixa) (R8.3) */}
             <div className="grid gap-1.5">
-              <label
-                htmlFor="task-priority"
-                className="text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="task-priority" className="text-sm font-medium text-slate-700">
                 Prioridade
               </label>
-              <Select
-                value={priority}
-                onValueChange={(value) => setPriority(value as Priority)}
-              >
+              <Select value={priority} onValueChange={(value) => setPriority(value as Priority)}>
                 <SelectTrigger id="task-priority" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -260,10 +242,7 @@ export function TaskDialog() {
 
           {/* Project — every project plus a no-project option (R8.3) */}
           <div className="grid gap-1.5">
-            <label
-              htmlFor="task-project"
-              className="text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="task-project" className="text-sm font-medium text-slate-700">
               Projeto
             </label>
             <Select value={project} onValueChange={setProject}>
@@ -274,10 +253,7 @@ export function TaskDialog() {
                 <SelectItem value={NO_PROJECT}>Sem projeto</SelectItem>
                 {projects.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ background: p.color }}
-                    />
+                    <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
                     {p.name}
                   </SelectItem>
                 ))}
@@ -294,8 +270,8 @@ export function TaskDialog() {
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={submitting} className={cn(submitting && "opacity-80")}>
-              {isEditing ? "Salvar" : "Criar tarefa"}
+            <Button type="submit" disabled={submitting} className={cn(submitting && 'opacity-80')}>
+              {isEditing ? 'Salvar' : 'Criar tarefa'}
             </Button>
           </DialogFooter>
         </form>

@@ -30,14 +30,14 @@ import {
   useRef,
   useState,
   type ReactNode,
-} from "react";
-import { api, UnauthorizedError, type User } from "../lib/api";
+} from 'react';
+import { api, UnauthorizedError, type User } from '../lib/api';
 
 /** sessionStorage key used to persist the Bearer token across reloads. */
-const TOKEN_STORAGE_KEY = "taskiro.token";
+const TOKEN_STORAGE_KEY = 'taskiro.token';
 
 /** Authentication lifecycle status. */
-export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
 export interface AuthContextValue {
   /** The authenticated user, or null when signed out. */
@@ -73,13 +73,13 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 function normalizeUser(raw: unknown): User {
   const r = (raw ?? {}) as Record<string, unknown>;
   const displayName =
-    (typeof r.displayName === "string" && r.displayName) ||
-    (typeof r.display_name === "string" && r.display_name) ||
-    "";
+    (typeof r.displayName === 'string' && r.displayName) ||
+    (typeof r.display_name === 'string' && r.display_name) ||
+    '';
   return {
-    id: String(r.id ?? ""),
+    id: String(r.id ?? ''),
     displayName,
-    email: typeof r.email === "string" ? r.email : "",
+    email: typeof r.email === 'string' ? r.email : '',
   };
 }
 
@@ -87,7 +87,7 @@ function normalizeUser(raw: unknown): User {
 
 function readStoredToken(): string | null {
   try {
-    if (typeof window === "undefined") return null;
+    if (typeof window === 'undefined') return null;
     return window.sessionStorage.getItem(TOKEN_STORAGE_KEY);
   } catch {
     return null;
@@ -96,7 +96,7 @@ function readStoredToken(): string | null {
 
 function writeStoredToken(token: string | null): void {
   try {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     if (token) window.sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
     else window.sessionStorage.removeItem(TOKEN_STORAGE_KEY);
   } catch {
@@ -112,7 +112,7 @@ export interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
-  const [status, setStatus] = useState<AuthStatus>("loading");
+  const [status, setStatus] = useState<AuthStatus>('loading');
 
   // Guard against setting state after unmount during the async restore.
   const mountedRef = useRef(true);
@@ -133,14 +133,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const handleUnauthorized = useCallback(() => {
     clearLocal();
-    setStatus("unauthenticated");
+    setStatus('unauthenticated');
   }, [clearLocal]);
 
   // On mount, restore a persisted session (if any) by re-validating via /api/me.
   useEffect(() => {
     const stored = readStoredToken();
     if (!stored) {
-      setStatus("unauthenticated");
+      setStatus('unauthenticated');
       return;
     }
     api.setToken(stored);
@@ -150,32 +150,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const restored = await api.me();
         if (!mountedRef.current) return;
         setUser(normalizeUser(restored));
-        setStatus("authenticated");
+        setStatus('authenticated');
       } catch {
         // Stale/invalid token — clear and treat as signed out.
         if (!mountedRef.current) return;
         clearLocal();
-        setStatus("unauthenticated");
+        setStatus('unauthenticated');
       }
     })();
   }, [clearLocal]);
 
-  const login = useCallback(
-    async (email: string, password: string): Promise<User> => {
-      const { token: newToken, user: rawUser } = await api.login({
-        email,
-        password,
-      });
-      api.setToken(newToken);
-      writeStoredToken(newToken);
-      const normalized = normalizeUser(rawUser);
-      setTokenState(newToken);
-      setUser(normalized);
-      setStatus("authenticated");
-      return normalized;
-    },
-    [],
-  );
+  const login = useCallback(async (email: string, password: string): Promise<User> => {
+    const { token: newToken, user: rawUser } = await api.login({
+      email,
+      password,
+    });
+    api.setToken(newToken);
+    writeStoredToken(newToken);
+    const normalized = normalizeUser(rawUser);
+    setTokenState(newToken);
+    setUser(normalized);
+    setStatus('authenticated');
+    return normalized;
+  }, []);
 
   const logout = useCallback(async (): Promise<void> => {
     try {
@@ -185,7 +182,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // clear local state so the UI returns to the signed-out gate.
     }
     clearLocal();
-    setStatus("unauthenticated");
+    setStatus('unauthenticated');
   }, [clearLocal]);
 
   const value = useMemo<AuthContextValue>(
@@ -208,7 +205,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (ctx === null) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return ctx;
 }

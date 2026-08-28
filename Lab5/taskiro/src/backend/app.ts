@@ -26,26 +26,26 @@
 //                      from handlers; `onError` serializes them to the contract.
 //   - `createApp`    — pass the route plugins (Elysia instances) to mount them.
 
-import { Elysia } from "elysia";
-import { getDatabase } from "./db";
-import { extractBearerToken, verifyToken, type PublicUser } from "./auth";
+import { Elysia } from 'elysia';
+import { getDatabase } from './db';
+import { extractBearerToken, verifyToken, type PublicUser } from './auth';
 
 // --- Error contract messages (pt-BR where the design specifies them) ---------
 
 /** 401 — missing/malformed/expired token on a protected route (R16.8, R18.6). */
-export const UNAUTHORIZED_MESSAGE = "Autenticação necessária";
+export const UNAUTHORIZED_MESSAGE = 'Autenticação necessária';
 /** 403 — access to a record owned by another user (R19.5); leaks no target data. */
-export const FORBIDDEN_MESSAGE = "Acesso negado.";
+export const FORBIDDEN_MESSAGE = 'Acesso negado.';
 /** 404 — resource not found (R16.6). */
-export const NOT_FOUND_MESSAGE = "Recurso não encontrado";
+export const NOT_FOUND_MESSAGE = 'Recurso não encontrado';
 /** 400 — schema validation failure or malformed JSON (R16.7). */
-export const VALIDATION_MESSAGE = "Dados inválidos.";
+export const VALIDATION_MESSAGE = 'Dados inválidos.';
 /** 400 — request body was not valid JSON. */
-export const MALFORMED_JSON_MESSAGE = "Corpo da requisição inválido (JSON malformado).";
+export const MALFORMED_JSON_MESSAGE = 'Corpo da requisição inválido (JSON malformado).';
 /** 409 — referential / constraint violation on a write (R17.7, R17.9). */
-export const CONFLICT_MESSAGE = "Violação de integridade dos dados.";
+export const CONFLICT_MESSAGE = 'Violação de integridade dos dados.';
 /** 503 — unexpected backend failure / timeout when routing (R13.5). */
-export const BACKEND_UNREACHABLE_MESSAGE = "Backend indisponível";
+export const BACKEND_UNREACHABLE_MESSAGE = 'Backend indisponível';
 
 // --- Typed API errors --------------------------------------------------------
 
@@ -144,7 +144,7 @@ export interface MappedError {
  * (e.g. `/title` → `title`), then falls back to its summary or a `property`.
  */
 function extractConstraint(error: unknown): string | undefined {
-  if (error === null || typeof error !== "object") return undefined;
+  if (error === null || typeof error !== 'object') return undefined;
   const candidate = error as {
     all?: Array<{ path?: unknown; summary?: unknown; message?: unknown }>;
     property?: unknown;
@@ -152,16 +152,16 @@ function extractConstraint(error: unknown): string | undefined {
 
   const first = Array.isArray(candidate.all) ? candidate.all[0] : undefined;
   if (first !== undefined) {
-    if (typeof first.path === "string" && first.path.length > 0) {
-      const field = first.path.replace(/^\//, "");
+    if (typeof first.path === 'string' && first.path.length > 0) {
+      const field = first.path.replace(/^\//, '');
       if (field.length > 0) return field;
     }
-    if (typeof first.summary === "string" && first.summary.length > 0) {
+    if (typeof first.summary === 'string' && first.summary.length > 0) {
       return first.summary;
     }
   }
 
-  if (typeof candidate.property === "string" && candidate.property.length > 0) {
+  if (typeof candidate.property === 'string' && candidate.property.length > 0) {
     return candidate.property;
   }
   return undefined;
@@ -188,22 +188,22 @@ export function mapError(code: string | number, error: unknown): MappedError {
       return {
         status: error.status,
         body,
-        headers: { "Retry-After": String(error.retryAfterSeconds) },
+        headers: { 'Retry-After': String(error.retryAfterSeconds) },
       };
     }
     return { status: error.status, body };
   }
 
   switch (code) {
-    case "VALIDATION": {
+    case 'VALIDATION': {
       const constraint = extractConstraint(error);
       const body: ErrorBody = { error: VALIDATION_MESSAGE };
       if (constraint !== undefined) body.constraint = constraint;
       return { status: 400, body };
     }
-    case "PARSE":
+    case 'PARSE':
       return { status: 400, body: { error: MALFORMED_JSON_MESSAGE } };
-    case "NOT_FOUND":
+    case 'NOT_FOUND':
       return { status: 404, body: { error: NOT_FOUND_MESSAGE } };
     default:
       // INTERNAL_SERVER_ERROR / UNKNOWN / anything unhandled (R13.5).
@@ -230,8 +230,8 @@ export function mapError(code: string | number, error: unknown): MappedError {
  * `as: "scoped"` propagates the resolved `user` to the consuming instance's
  * routes without leaking the guard globally across unrelated plugins.
  */
-export const requireAuth = new Elysia({ name: "taskiro-require-auth" }).resolve(
-  { as: "scoped" },
+export const requireAuth = new Elysia({ name: 'taskiro-require-auth' }).resolve(
+  { as: 'scoped' },
   async ({ headers }): Promise<{ user: PublicUser }> => {
     const token = extractBearerToken(headers.authorization);
     const verified = await verifyToken(getDatabase(), token);
@@ -272,7 +272,7 @@ export function createApp(routes: RoutePlugin[] = []): RoutePlugin {
       return mapped.body;
     })
     // Liveness probe (unauthenticated).
-    .get("/api/health", () => ({ status: "ok" as const }));
+    .get('/api/health', () => ({ status: 'ok' as const }));
 
   // ---- Route registration point (tasks 7.2–7.5) ----------------------------
   // Auth, Task, Project, and Notification route plugins mount here. Each is an

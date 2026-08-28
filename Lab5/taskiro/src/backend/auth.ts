@@ -20,15 +20,11 @@
 //
 // Requirements: 17.6, 18.1, 18.2, 18.3, 18.5, 18.6, 18.7
 
-import { SignJWT, jwtVerify } from "jose";
-import type { Database } from "bun:sqlite";
-import type { SessionRow, UserRow } from "./db";
-import { withTransaction } from "./db";
-import {
-  attemptTracker,
-  type AttemptTrackerConfig,
-  type RateLimitResult,
-} from "./rate-limit";
+import { SignJWT, jwtVerify } from 'jose';
+import type { Database } from 'bun:sqlite';
+import type { SessionRow, UserRow } from './db';
+import { withTransaction } from './db';
+import { attemptTracker, type AttemptTrackerConfig, type RateLimitResult } from './rate-limit';
 
 // --- Constants ---------------------------------------------------------------
 
@@ -36,13 +32,13 @@ import {
 export const SESSION_TTL_SECONDS = 3600;
 
 /** Signing algorithm for the HS256 session tokens. */
-const JWT_ALG = "HS256";
+const JWT_ALG = 'HS256';
 
 /**
  * Uniform message used for every credential failure so callers cannot tell
  * whether the email was unknown or the password was wrong (R18.3).
  */
-export const INVALID_CREDENTIALS_MESSAGE = "Credenciais inválidas.";
+export const INVALID_CREDENTIALS_MESSAGE = 'Credenciais inválidas.';
 
 // --- Public types ------------------------------------------------------------
 
@@ -90,10 +86,10 @@ export interface VerifiedToken {
  */
 export type LoginResult =
   | { ok: true; token: string; user: PublicUser; expiresAt: number }
-  | { ok: false; reason: "invalid"; message: string }
+  | { ok: false; reason: 'invalid'; message: string }
   | {
       ok: false;
-      reason: "rate_limited";
+      reason: 'rate_limited';
       message: string;
       retryAfterSeconds: number;
     };
@@ -114,17 +110,14 @@ const textEncoder = new TextEncoder();
  * server still runs (single-developer lab context) but tokens are only as strong
  * as this constant, so it must never be relied on in a real deployment.
  */
-const DEV_FALLBACK_SECRET =
-  "taskiro-dev-insecure-secret-change-me-via-JWT_SECRET";
+const DEV_FALLBACK_SECRET = 'taskiro-dev-insecure-secret-change-me-via-JWT_SECRET';
 
 let cachedSecret: Uint8Array | null = null;
 
 /** Resolve the HMAC signing key from `JWT_SECRET`, caching the encoded bytes. */
 function getSecretKey(): Uint8Array {
   if (cachedSecret === null) {
-    const raw =
-      (typeof process !== "undefined" && process.env?.JWT_SECRET) ||
-      DEV_FALLBACK_SECRET;
+    const raw = (typeof process !== 'undefined' && process.env?.JWT_SECRET) || DEV_FALLBACK_SECRET;
     cachedSecret = textEncoder.encode(raw);
   }
   return cachedSecret;
@@ -152,10 +145,7 @@ export function hashPassword(password: string): Promise<string> {
  * Verify a plaintext password against a stored hash. Returns `false` (never
  * throws) for malformed/unknown hash formats so callers get a uniform outcome.
  */
-export async function verifyPassword(
-  password: string,
-  hash: string,
-): Promise<boolean> {
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   try {
     return await Bun.password.verify(password, hash);
   } catch {
@@ -194,7 +184,7 @@ export async function verifySessionToken(
   token: string | undefined | null,
   now: number = nowSeconds(),
 ): Promise<SessionClaims | null> {
-  if (!token || typeof token !== "string") {
+  if (!token || typeof token !== 'string') {
     return null;
   }
   try {
@@ -204,10 +194,10 @@ export async function verifySessionToken(
     });
     const { sub, jti, iat, exp } = payload;
     if (
-      typeof sub !== "string" ||
-      typeof jti !== "string" ||
-      typeof iat !== "number" ||
-      typeof exp !== "number"
+      typeof sub !== 'string' ||
+      typeof jti !== 'string' ||
+      typeof iat !== 'number' ||
+      typeof exp !== 'number'
     ) {
       return null;
     }
@@ -236,23 +226,19 @@ export async function createSession(
   const token = await signSessionToken({ sub: userId, jti, iat, exp: expiresAt });
 
   withTransaction(db, (tx) => {
-    tx.query(
-      "INSERT INTO sessions (jti, user_id, expires_at) VALUES (?, ?, ?)",
-    ).run(jti, userId, expiresAt);
+    tx.query('INSERT INTO sessions (jti, user_id, expires_at) VALUES (?, ?, ?)').run(
+      jti,
+      userId,
+      expiresAt,
+    );
   });
 
   return { token, jti, userId, expiresAt };
 }
 
 /** Look up the active (unexpired) session row for `jti`, or `null`. */
-function getActiveSession(
-  db: Database,
-  jti: string,
-  now: number,
-): SessionRow | null {
-  const row = db
-    .query<SessionRow, [string]>("SELECT * FROM sessions WHERE jti = ?")
-    .get(jti);
+function getActiveSession(db: Database, jti: string, now: number): SessionRow | null {
+  const row = db.query<SessionRow, [string]>('SELECT * FROM sessions WHERE jti = ?').get(jti);
   if (row === null) return null;
   // Half-open expiry: a session is valid strictly before `expires_at`.
   if (row.expires_at <= now) return null;
@@ -261,9 +247,7 @@ function getActiveSession(
 
 /** Fetch a user as a `PublicUser` (no password hash), or `null`. */
 export function getUserById(db: Database, id: string): PublicUser | null {
-  const row = db
-    .query<UserRow, [string]>("SELECT * FROM users WHERE id = ?")
-    .get(id);
+  const row = db.query<UserRow, [string]>('SELECT * FROM users WHERE id = ?').get(id);
   return row === null ? null : toPublicUser(row);
 }
 
@@ -302,22 +286,17 @@ export async function verifyToken(
 export function revokeSession(db: Database, jti: string): boolean {
   let changes = 0;
   withTransaction(db, (tx) => {
-    const result = tx.query("DELETE FROM sessions WHERE jti = ?").run(jti);
+    const result = tx.query('DELETE FROM sessions WHERE jti = ?').run(jti);
     changes = result.changes;
   });
   return changes > 0;
 }
 
 /** Remove every expired session row (housekeeping). Returns rows deleted. */
-export function purgeExpiredSessions(
-  db: Database,
-  now: number = nowSeconds(),
-): number {
+export function purgeExpiredSessions(db: Database, now: number = nowSeconds()): number {
   let changes = 0;
   withTransaction(db, (tx) => {
-    const result = tx
-      .query("DELETE FROM sessions WHERE expires_at <= ?")
-      .run(now);
+    const result = tx.query('DELETE FROM sessions WHERE expires_at <= ?').run(now);
     changes = result.changes;
   });
   return changes;
@@ -339,14 +318,9 @@ function normalizeEmail(email: string): string {
 
 /** Record a failed login for `email` at `now`, pruning entries that can no
  * longer contribute to a lockout to keep the log bounded. */
-function recordFailure(
-  email: string,
-  now: number,
-  config: Partial<AttemptTrackerConfig>,
-): void {
+function recordFailure(email: string, now: number, config: Partial<AttemptTrackerConfig>): void {
   const key = normalizeEmail(email);
-  const horizon =
-    now - ((config.windowSeconds ?? 300) + (config.lockoutSeconds ?? 900));
+  const horizon = now - ((config.windowSeconds ?? 300) + (config.lockoutSeconds ?? 900));
   const existing = (failureLog.get(key) ?? []).filter((t) => t >= horizon);
   existing.push(now);
   failureLog.set(key, existing);
@@ -395,24 +369,23 @@ export async function login(
   if (limit.limited) {
     return {
       ok: false,
-      reason: "rate_limited",
-      message: "Muitas tentativas. Tente novamente mais tarde.",
+      reason: 'rate_limited',
+      message: 'Muitas tentativas. Tente novamente mais tarde.',
       retryAfterSeconds: limit.retryAfterSeconds,
     };
   }
 
   const userRow = db
-    .query<UserRow, [string]>("SELECT * FROM users WHERE email = ?")
+    .query<UserRow, [string]>('SELECT * FROM users WHERE email = ?')
     .get(normalizeEmail(email));
 
-  const passwordOk =
-    userRow !== null && (await verifyPassword(password, userRow.password_hash));
+  const passwordOk = userRow !== null && (await verifyPassword(password, userRow.password_hash));
 
   if (userRow === null || !passwordOk) {
     recordFailure(email, now, config);
     return {
       ok: false,
-      reason: "invalid",
+      reason: 'invalid',
       message: INVALID_CREDENTIALS_MESSAGE,
     };
   }
@@ -447,10 +420,8 @@ export async function logout(
  * token or `null` if the header is missing or not a well-formed `Bearer` scheme
  * (callers map `null` to 401) (R18.6).
  */
-export function extractBearerToken(
-  authorization: string | undefined | null,
-): string | null {
-  if (!authorization || typeof authorization !== "string") return null;
+export function extractBearerToken(authorization: string | undefined | null): string | null {
+  if (!authorization || typeof authorization !== 'string') return null;
   const match = authorization.match(/^Bearer\s+(.+)$/i);
   return match ? match[1]!.trim() : null;
 }

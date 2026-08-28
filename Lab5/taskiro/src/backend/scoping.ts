@@ -33,13 +33,13 @@
 //
 // Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.7
 
-import type { Database } from "bun:sqlite";
-import { withTransaction } from "./db";
+import type { Database } from 'bun:sqlite';
+import { withTransaction } from './db';
 
 // --- Owner column ------------------------------------------------------------
 
 /** The column on every scoped table that records the owning user. */
-export const OWNER_COLUMN = "user_id" as const;
+export const OWNER_COLUMN = 'user_id' as const;
 
 // --- Scoped-table registry ---------------------------------------------------
 
@@ -61,25 +61,25 @@ export interface ScopedTableMeta {
 export const SCOPED_TABLES = {
   tasks: {
     columns: [
-      "id",
-      "title",
-      "description",
-      "due",
-      "priority",
-      "project_id",
-      "status",
-      "done",
-      "user_id",
+      'id',
+      'title',
+      'description',
+      'due',
+      'priority',
+      'project_id',
+      'status',
+      'done',
+      'user_id',
     ],
-    primaryKey: "id",
+    primaryKey: 'id',
   },
   projects: {
-    columns: ["id", "name", "color", "user_id"],
-    primaryKey: "id",
+    columns: ['id', 'name', 'color', 'user_id'],
+    primaryKey: 'id',
   },
   notifications: {
-    columns: ["id", "text", "time", "read", "user_id"],
-    primaryKey: "id",
+    columns: ['id', 'text', 'time', 'read', 'user_id'],
+    primaryKey: 'id',
   },
 } as const satisfies Record<string, ScopedTableMeta>;
 
@@ -108,15 +108,13 @@ function tableMeta(table: ScopedTableName): ScopedTableMeta {
  * blank id means "no authenticated user", so scoped operations must not touch
  * any data (R19.6).
  */
-export function isAuthenticated(
-  userId: string | null | undefined,
-): userId is string {
-  return typeof userId === "string" && userId.trim().length > 0;
+export function isAuthenticated(userId: string | null | undefined): userId is string {
+  return typeof userId === 'string' && userId.trim().length > 0;
 }
 
 /** Whether `id` is a usable row identity (non-blank string). */
 function isValidId(id: string | null | undefined): id is string {
-  return typeof id === "string" && id.length > 0;
+  return typeof id === 'string' && id.length > 0;
 }
 
 /**
@@ -148,16 +146,16 @@ type SqlValue = string | number | bigint | boolean | null | Uint8Array;
 function toSqlValue(value: unknown): SqlValue {
   if (
     value === null ||
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "bigint" ||
-    typeof value === "boolean" ||
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'bigint' ||
+    typeof value === 'boolean' ||
     value instanceof Uint8Array
   ) {
     return value as SqlValue;
   }
   // Defensive: anything else (objects, arrays) is not a valid column value.
-  throw new Error("Unsupported SQL value type for scoped write");
+  throw new Error('Unsupported SQL value type for scoped write');
 }
 
 // --- Read helpers (R19.1, R19.2, R19.5, R19.6) -------------------------------
@@ -167,7 +165,7 @@ export interface ListOptions {
   /** Column to order by (validated against the table's columns). */
   orderBy?: string;
   /** Sort direction; defaults to ascending. */
-  direction?: "asc" | "desc";
+  direction?: 'asc' | 'desc';
 }
 
 /**
@@ -191,7 +189,7 @@ export function listOwned<T>(
     if (!meta.columns.includes(options.orderBy)) {
       throw new Error(`Unknown order-by column: ${options.orderBy}`);
     }
-    const direction = options.direction === "desc" ? "DESC" : "ASC";
+    const direction = options.direction === 'desc' ? 'DESC' : 'ASC';
     sql += ` ORDER BY ${options.orderBy} ${direction}`;
   }
 
@@ -238,9 +236,7 @@ export function insertOwned<T>(
 
   // Client-supplied owner is ignored; identity is generated when absent.
   const entries = pickColumns(meta, values, [OWNER_COLUMN]);
-  const columnMap = new Map<string, SqlValue>(
-    entries.map(([col, val]) => [col, toSqlValue(val)]),
-  );
+  const columnMap = new Map<string, SqlValue>(entries.map(([col, val]) => [col, toSqlValue(val)]));
 
   if (!columnMap.has(meta.primaryKey)) {
     columnMap.set(meta.primaryKey, crypto.randomUUID());
@@ -249,12 +245,10 @@ export function insertOwned<T>(
   columnMap.set(OWNER_COLUMN, userId);
 
   const columns = [...columnMap.keys()];
-  const placeholders = columns.map(() => "?").join(", ");
+  const placeholders = columns.map(() => '?').join(', ');
   const params = columns.map((c) => columnMap.get(c)!);
 
-  const sql = `INSERT INTO ${table} (${columns.join(
-    ", ",
-  )}) VALUES (${placeholders}) RETURNING *`;
+  const sql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders}) RETURNING *`;
 
   return withTransaction(db, (tx) => tx.query<T, SqlValue[]>(sql).get(...params) ?? null);
 }
@@ -287,12 +281,8 @@ export function updateOwned<T>(
     return getOwned<T>(db, table, userId, id);
   }
 
-  const setClause = entries.map(([col]) => `${col} = ?`).join(", ");
-  const params: SqlValue[] = [
-    ...entries.map(([, val]) => toSqlValue(val)),
-    id,
-    userId,
-  ];
+  const setClause = entries.map(([col]) => `${col} = ?`).join(', ');
+  const params: SqlValue[] = [...entries.map(([, val]) => toSqlValue(val)), id, userId];
 
   const sql = `UPDATE ${table} SET ${setClause} WHERE ${meta.primaryKey} = ? AND ${OWNER_COLUMN} = ? RETURNING *`;
 

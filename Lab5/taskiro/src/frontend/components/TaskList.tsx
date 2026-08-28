@@ -13,9 +13,9 @@
  * task to a card.
  */
 
-import { TaskCard } from "@/components/TaskCard";
-import { useData } from "@/state/DataContext";
-import type { Task } from "@/lib/logic";
+import { TaskCard } from '@/components/TaskCard';
+import { useData } from '@/state/DataContext';
+import type { Task } from '@/lib/logic';
 
 export interface TaskListProps {
   /**
@@ -37,12 +37,7 @@ export function TaskList({ tasks, onEdit, onDelete }: TaskListProps) {
   return (
     <div className="mx-auto max-w-4xl space-y-3">
       {list.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} />
       ))}
     </div>
   );

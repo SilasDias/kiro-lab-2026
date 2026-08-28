@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 /*
  * TasKiro theme — OKLCH design tokens (Requirements 2.1, 2.2, 2.8, 14.3, 14.7).

@@ -22,10 +22,10 @@
  * components may import the host and the emitter from one module.
  */
 
-import type { CSSProperties } from "react";
-import { toast } from "sonner";
+import type { CSSProperties } from 'react';
+import { toast } from 'sonner';
 
-import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 
 /** Auto-dismiss delay in milliseconds (Requirement 11.6: 3.2 s). */
 export const TOAST_DURATION_MS = 3200;
@@ -38,18 +38,18 @@ export const TOAST_DURATION_MS = 3200;
  * the variants are visually distinct yet fully theme-sourced.
  */
 const TOAST_STYLE: CSSProperties = {
-  "--normal-bg": "var(--popover)",
-  "--normal-text": "var(--popover-foreground)",
-  "--normal-border": "var(--border)",
-  "--success-bg": "var(--popover)",
-  "--success-text": "var(--priority-low)",
-  "--success-border": "var(--priority-low)",
-  "--info-bg": "var(--popover)",
-  "--info-text": "var(--primary)",
-  "--info-border": "var(--primary)",
-  "--error-bg": "var(--popover)",
-  "--error-text": "var(--destructive)",
-  "--error-border": "var(--destructive)",
+  '--normal-bg': 'var(--popover)',
+  '--normal-text': 'var(--popover-foreground)',
+  '--normal-border': 'var(--border)',
+  '--success-bg': 'var(--popover)',
+  '--success-text': 'var(--priority-low)',
+  '--success-border': 'var(--priority-low)',
+  '--info-bg': 'var(--popover)',
+  '--info-text': 'var(--primary)',
+  '--info-border': 'var(--primary)',
+  '--error-bg': 'var(--popover)',
+  '--error-text': 'var(--destructive)',
+  '--error-border': 'var(--destructive)',
 } as CSSProperties;
 
 /**

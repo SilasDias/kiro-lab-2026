@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
-import { Toaster as Sonner, type ToasterProps } from "sonner";
+import type { CSSProperties } from 'react';
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
 /**
  * Toaster wrapper around `sonner`.
@@ -10,16 +10,16 @@ import { Toaster as Sonner, type ToasterProps } from "sonner";
  * Colors are sourced exclusively from the OKLCH CSS variables defined in
  * `src/styles/globals.css` (Requirements 14.3, 14.7) — no per-component literals.
  */
-function Toaster({ theme = "light", ...props }: ToasterProps) {
+function Toaster({ theme = 'light', ...props }: ToasterProps) {
   return (
     <Sonner
       theme={theme}
       className="toaster group"
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
+          '--normal-bg': 'var(--popover)',
+          '--normal-text': 'var(--popover-foreground)',
+          '--normal-border': 'var(--border)',
         } as CSSProperties
       }
       {...props}

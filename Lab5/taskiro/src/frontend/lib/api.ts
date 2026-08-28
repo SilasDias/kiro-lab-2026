@@ -19,7 +19,7 @@
  * Endpoints mirror the design's "Backend REST API" table.
  */
 
-import type { Priority, Task } from "./logic";
+import type { Priority, Task } from './logic';
 
 // ---------- Wire DTOs ----------
 
@@ -67,7 +67,7 @@ export type UpdateTaskInput = Partial<{
   due: string | null;
   priority: Priority;
   project: string | null;
-  status: Task["status"];
+  status: Task['status'];
   done: boolean;
 }>;
 
@@ -86,14 +86,9 @@ export class ApiError extends Error {
   /** The raw parsed error body, for callers that need extra detail. */
   readonly body: unknown;
 
-  constructor(
-    message: string,
-    status: number,
-    body?: unknown,
-    constraint?: string,
-  ) {
+  constructor(message: string, status: number, body?: unknown, constraint?: string) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
     this.status = status;
     this.body = body;
     this.constraint = constraint;
@@ -102,33 +97,33 @@ export class ApiError extends Error {
 
 /** 401 — missing, malformed, or expired session token / bad credentials. */
 export class UnauthorizedError extends ApiError {
-  constructor(message = "Não autorizado", body?: unknown, constraint?: string) {
+  constructor(message = 'Não autorizado', body?: unknown, constraint?: string) {
     super(message, 401, body, constraint);
-    this.name = "UnauthorizedError";
+    this.name = 'UnauthorizedError';
   }
 }
 
 /** 400 — request body failed validation (the violated constraint is named). */
 export class ValidationError extends ApiError {
-  constructor(message = "Requisição inválida", body?: unknown, constraint?: string) {
+  constructor(message = 'Requisição inválida', body?: unknown, constraint?: string) {
     super(message, 400, body, constraint);
-    this.name = "ValidationError";
+    this.name = 'ValidationError';
   }
 }
 
 /** 404 — the requested resource does not exist (or is not visible). */
 export class NotFoundError extends ApiError {
-  constructor(message = "Não encontrado", body?: unknown, constraint?: string) {
+  constructor(message = 'Não encontrado', body?: unknown, constraint?: string) {
     super(message, 404, body, constraint);
-    this.name = "NotFoundError";
+    this.name = 'NotFoundError';
   }
 }
 
 /** 403 — the resource exists but is owned by another user. */
 export class ForbiddenError extends ApiError {
-  constructor(message = "Acesso negado", body?: unknown, constraint?: string) {
+  constructor(message = 'Acesso negado', body?: unknown, constraint?: string) {
     super(message, 403, body, constraint);
-    this.name = "ForbiddenError";
+    this.name = 'ForbiddenError';
   }
 }
 
@@ -155,7 +150,7 @@ export class ApiClient {
   private readonly fetchFn: typeof fetch;
 
   constructor(options: ApiClientOptions = {}) {
-    this.baseUrl = options.baseUrl ?? "";
+    this.baseUrl = options.baseUrl ?? '';
     this.token = options.token ?? null;
     // The native `fetch` must be invoked with `this` bound to the global
     // object. Storing it as an instance property and calling it as
@@ -182,16 +177,12 @@ export class ApiClient {
 
   // --- Core request helper ---
 
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown,
-  ): Promise<T> {
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const headers: Record<string, string> = {};
-    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
 
     const hasBody = body !== undefined;
-    if (hasBody) headers["Content-Type"] = "application/json";
+    if (hasBody) headers['Content-Type'] = 'application/json';
 
     const res = await this.fetchFn(`${this.baseUrl}${path}`, {
       method,
@@ -236,12 +227,7 @@ export class ApiClient {
       case 404:
         return new NotFoundError(message, body, constraint);
       default:
-        return new ApiError(
-          message ?? `Erro na requisição (${status})`,
-          status,
-          body,
-          constraint,
-        );
+        return new ApiError(message ?? `Erro na requisição (${status})`, status, body, constraint);
     }
   }
 
@@ -249,21 +235,17 @@ export class ApiClient {
 
   /** POST /api/auth/login → { token, user } (401 bad creds, 429 rate-limited). */
   async login(input: LoginInput): Promise<{ token: string; user: User }> {
-    return this.request<{ token: string; user: User }>(
-      "POST",
-      "/api/auth/login",
-      input,
-    );
+    return this.request<{ token: string; user: User }>('POST', '/api/auth/login', input);
   }
 
   /** POST /api/auth/logout → { ok } (revokes the current session). */
   async logout(): Promise<{ ok: boolean }> {
-    return this.request<{ ok: boolean }>("POST", "/api/auth/logout");
+    return this.request<{ ok: boolean }>('POST', '/api/auth/logout');
   }
 
   /** GET /api/me → the authenticated user. */
   async me(): Promise<User> {
-    const res = await this.request<{ user: User }>("GET", "/api/me");
+    const res = await this.request<{ user: User }>('GET', '/api/me');
     return res.user;
   }
 
@@ -271,61 +253,51 @@ export class ApiClient {
 
   /** GET /api/tasks → the authenticated user's tasks. */
   listTasks(): Promise<Task[]> {
-    return this.request<Task[]>("GET", "/api/tasks");
+    return this.request<Task[]>('GET', '/api/tasks');
   }
 
   /** POST /api/tasks → the created task (201). */
   createTask(input: CreateTaskInput): Promise<Task> {
-    return this.request<Task>("POST", "/api/tasks", input);
+    return this.request<Task>('POST', '/api/tasks', input);
   }
 
   /** GET /api/tasks/:id → a single owned task. */
   getTask(id: string): Promise<Task> {
-    return this.request<Task>("GET", `/api/tasks/${encodeURIComponent(id)}`);
+    return this.request<Task>('GET', `/api/tasks/${encodeURIComponent(id)}`);
   }
 
   /** PATCH /api/tasks/:id → the updated task. */
   updateTask(id: string, patch: UpdateTaskInput): Promise<Task> {
-    return this.request<Task>(
-      "PATCH",
-      `/api/tasks/${encodeURIComponent(id)}`,
-      patch,
-    );
+    return this.request<Task>('PATCH', `/api/tasks/${encodeURIComponent(id)}`, patch);
   }
 
   /** DELETE /api/tasks/:id → { ok }. */
   deleteTask(id: string): Promise<{ ok: boolean }> {
-    return this.request<{ ok: boolean }>(
-      "DELETE",
-      `/api/tasks/${encodeURIComponent(id)}`,
-    );
+    return this.request<{ ok: boolean }>('DELETE', `/api/tasks/${encodeURIComponent(id)}`);
   }
 
   // --- Projects ---
 
   /** GET /api/projects → the authenticated user's projects. */
   listProjects(): Promise<Project[]> {
-    return this.request<Project[]>("GET", "/api/projects");
+    return this.request<Project[]>('GET', '/api/projects');
   }
 
   /** POST /api/projects → the created project (201). */
   createProject(input: CreateProjectInput): Promise<Project> {
-    return this.request<Project>("POST", "/api/projects", input);
+    return this.request<Project>('POST', '/api/projects', input);
   }
 
   // --- Notifications ---
 
   /** GET /api/notifications → the authenticated user's notifications. */
   listNotifications(): Promise<Notification[]> {
-    return this.request<Notification[]>("GET", "/api/notifications");
+    return this.request<Notification[]>('GET', '/api/notifications');
   }
 
   /** POST /api/notifications/mark-all-read → { updated }. */
   markAllNotificationsRead(): Promise<{ updated: number }> {
-    return this.request<{ updated: number }>(
-      "POST",
-      "/api/notifications/mark-all-read",
-    );
+    return this.request<{ updated: number }>('POST', '/api/notifications/mark-all-read');
   }
 }
 

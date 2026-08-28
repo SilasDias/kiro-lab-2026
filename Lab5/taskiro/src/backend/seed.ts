@@ -15,19 +15,14 @@
 //
 // Requirements: 17.10, 17.11, 18.1
 
-import type { Database } from "bun:sqlite";
-import {
-  withTransaction,
-  type Priority,
-  type Status,
-  type UserRow,
-} from "./db";
+import type { Database } from 'bun:sqlite';
+import { withTransaction, type Priority, type Status, type UserRow } from './db';
 
 // --- Seeded user identity (mirrors the prototype's avatar/user footer) ---
-export const SEED_USER_ID = "u1";
-export const SEED_USER_NAME = "Ana Silva";
-export const SEED_USER_EMAIL = "ana@taskiro.app";
-export const SEED_USER_INITIALS = "AS";
+export const SEED_USER_ID = 'u1';
+export const SEED_USER_NAME = 'Ana Silva';
+export const SEED_USER_EMAIL = 'ana@taskiro.app';
+export const SEED_USER_INITIALS = 'AS';
 
 /**
  * Default password for the seeded demo account. This is a development/demo
@@ -35,7 +30,7 @@ export const SEED_USER_INITIALS = "AS";
  * plaintext is never persisted (R18.1). Documented here so the demo login is
  * reproducible.
  */
-export const SEED_USER_PASSWORD = "taskiro123";
+export const SEED_USER_PASSWORD = 'taskiro123';
 
 // --- Projects (verbatim from the prototype) ---
 interface SeedProject {
@@ -45,9 +40,9 @@ interface SeedProject {
 }
 
 const SEED_PROJECTS: SeedProject[] = [
-  { id: "p1", name: "Trabalho", color: "#6366f1" },
-  { id: "p2", name: "Pessoal", color: "#10b981" },
-  { id: "p3", name: "Estudos", color: "#f59e0b" },
+  { id: 'p1', name: 'Trabalho', color: '#6366f1' },
+  { id: 'p2', name: 'Pessoal', color: '#10b981' },
+  { id: 'p3', name: 'Estudos', color: '#f59e0b' },
 ];
 
 // --- Tasks (verbatim from the prototype) ---
@@ -66,73 +61,73 @@ interface SeedTask {
 
 const SEED_TASKS: SeedTask[] = [
   {
-    id: "t1",
-    title: "Finalizar apresentação do trimestre",
-    description: "Slides + dados de vendas",
+    id: 't1',
+    title: 'Finalizar apresentação do trimestre',
+    description: 'Slides + dados de vendas',
     dueOffset: 0,
-    priority: "high",
-    projectId: "p1",
-    status: "doing",
+    priority: 'high',
+    projectId: 'p1',
+    status: 'doing',
     done: false,
   },
   {
-    id: "t2",
-    title: "Responder e-mails de clientes",
-    description: "",
+    id: 't2',
+    title: 'Responder e-mails de clientes',
+    description: '',
     dueOffset: 0,
-    priority: "medium",
-    projectId: "p1",
-    status: "todo",
+    priority: 'medium',
+    projectId: 'p1',
+    status: 'todo',
     done: false,
   },
   {
-    id: "t3",
-    title: "Comprar mantimentos",
-    description: "Frutas, café e pão",
+    id: 't3',
+    title: 'Comprar mantimentos',
+    description: 'Frutas, café e pão',
     dueOffset: 1,
-    priority: "low",
-    projectId: "p2",
-    status: "todo",
+    priority: 'low',
+    projectId: 'p2',
+    status: 'todo',
     done: false,
   },
   {
-    id: "t4",
-    title: "Estudar capítulo 5 de UX",
-    description: "Heurísticas de Nielsen",
+    id: 't4',
+    title: 'Estudar capítulo 5 de UX',
+    description: 'Heurísticas de Nielsen',
     dueOffset: 2,
-    priority: "medium",
-    projectId: "p3",
-    status: "todo",
+    priority: 'medium',
+    projectId: 'p3',
+    status: 'todo',
     done: false,
   },
   {
-    id: "t5",
-    title: "Agendar consulta médica",
-    description: "",
+    id: 't5',
+    title: 'Agendar consulta médica',
+    description: '',
     dueOffset: -1,
-    priority: "high",
-    projectId: "p2",
-    status: "todo",
+    priority: 'high',
+    projectId: 'p2',
+    status: 'todo',
     done: false,
   },
   {
-    id: "t6",
-    title: "Revisar pull request da equipe",
-    description: "Feature de login",
+    id: 't6',
+    title: 'Revisar pull request da equipe',
+    description: 'Feature de login',
     dueOffset: 3,
-    priority: "medium",
-    projectId: "p1",
-    status: "done",
+    priority: 'medium',
+    projectId: 'p1',
+    status: 'done',
     done: true,
   },
   {
-    id: "t7",
-    title: "Planejar viagem de férias",
-    description: "",
+    id: 't7',
+    title: 'Planejar viagem de férias',
+    description: '',
     dueOffset: 10,
-    priority: "low",
-    projectId: "p2",
-    status: "doing",
+    priority: 'low',
+    projectId: 'p2',
+    status: 'doing',
     done: false,
   },
 ];
@@ -149,20 +144,20 @@ interface SeedNotification {
 
 const SEED_NOTIFICATIONS: SeedNotification[] = [
   {
-    id: "n1",
-    text: "Reunião de planejamento às 15h",
+    id: 'n1',
+    text: 'Reunião de planejamento às 15h',
     offsetSeconds: 10 * 60, // ≈ now − 10 min  → "há 10 min"
     read: false,
   },
   {
-    id: "n2",
+    id: 'n2',
     text: 'Tarefa "Revisar proposta" vence hoje',
     offsetSeconds: 60 * 60, // ≈ now − 1 h      → "há 1 h"
     read: false,
   },
   {
-    id: "n3",
-    text: "Bem-vinda ao TasKiro!",
+    id: 'n3',
+    text: 'Bem-vinda ao TasKiro!',
     offsetSeconds: 2 * 24 * 60 * 60, // ≈ now − 2 dias → "há 2 dias"
     read: true,
   },
@@ -171,8 +166,8 @@ const SEED_NOTIFICATIONS: SeedNotification[] = [
 /** Format a Date as 'YYYY-MM-DD' (round-trippable task due storage, R17.2). */
 function toDateString(d: Date): string {
   const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
@@ -193,9 +188,9 @@ function dueFromOffset(offset: number, base: Date): string {
  * guaranteeing no duplicates on re-initialization (R17.11).
  */
 export function isSeeded(db: Database): boolean {
-  const row = db
-    .query("SELECT 1 AS present FROM users WHERE id = ? LIMIT 1")
-    .get(SEED_USER_ID) as { present: number } | null;
+  const row = db.query('SELECT 1 AS present FROM users WHERE id = ? LIMIT 1').get(SEED_USER_ID) as {
+    present: number;
+  } | null;
   return row !== null;
 }
 
@@ -212,10 +207,7 @@ export function isSeeded(db: Database): boolean {
  * @param now  reference time for relative due dates / notification offsets;
  *             defaults to the current time. Injectable for deterministic tests.
  */
-export async function seedDatabase(
-  db: Database,
-  now: Date = new Date(),
-): Promise<boolean> {
+export async function seedDatabase(db: Database, now: Date = new Date()): Promise<boolean> {
   // Existence check guard — re-initialization creates no duplicates (R17.11).
   if (isSeeded(db)) {
     return false;
