@@ -58,7 +58,7 @@ Todos os comandos abaixo rodam **dentro da subpasta `taskiro/`**, não na raiz d
 4. Abra no navegador:
 
    ```
-   http://localhost:3000
+   http://localhost:3100
    ```
 
 Para rodar em modo de produção, use `bun run start` no lugar do passo 3.

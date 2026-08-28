@@ -58,7 +58,7 @@ All the commands below run **inside the `taskiro/` subfolder**, not at the works
 4. Open it in your browser:
 
    ```
-   http://localhost:3000
+   http://localhost:3100
    ```
 
 To run in production mode, use `bun run start` instead of step 3.

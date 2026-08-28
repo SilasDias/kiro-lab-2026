@@ -36,7 +36,7 @@ import { isSeeded, seedDatabase } from "./backend/seed";
 // --- Configuration -----------------------------------------------------------
 
 /** Listen port; overridable via `PORT` for deployment flexibility. */
-const PORT = Number(process.env.PORT ?? 3000);
+const PORT = Number(process.env.PORT ?? 3100);
 
 /**
  * Development mode enables Bun's detailed bundling errors and hot reloading.

@@ -58,7 +58,7 @@ Todos los comandos a continuación se ejecutan **dentro de la subcarpeta `taskir
 4. Ábrela en el navegador:
 
    ```
-   http://localhost:3000
+   http://localhost:3100
    ```
 
 Para ejecutar en modo de producción, usa `bun run start` en lugar del paso 3.
