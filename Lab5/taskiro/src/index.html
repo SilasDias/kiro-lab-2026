@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TasKiro</title>
+
+    <!--
+      CDN-free entry (R15.1, R15.2, R15.5):
+      - NO Tailwind Play CDN <script>.
+      - NO Lucide CDN <script>; icons come from the lucide-react package.
+      - NO external font CDN; the Inter / system font stack is defined in globals.css (R2.2).
+      Tailwind is compiled locally via bun-plugin-tailwind from the imported stylesheet,
+      and the React entry is transpiled/bundled by the Bun Fullstack Dev Server (R15.3, R15.4).
+    -->
+    <link rel="stylesheet" href="./styles/globals.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./frontend/main.tsx"></script>
+  </body>
+</html>
