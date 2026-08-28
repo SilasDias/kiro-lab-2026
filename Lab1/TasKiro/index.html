@@ -262,6 +262,24 @@
           <label class="block text-sm font-semibold mb-1.5">Projeto</label>
           <select id="taskProject" class="w-full px-3 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-brand-500 outline-none"></select>
         </div>
+
+        <!-- Subtarefas -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-sm font-semibold">Subtarefas</label>
+            <span id="subtaskProgressLabel" class="text-xs font-semibold text-slate-400"></span>
+          </div>
+          <div id="subtaskList" class="space-y-2 mb-2"></div>
+          <div id="subtaskEmpty" class="text-xs text-slate-400 mb-2">Nenhuma subtarefa ainda. Divida a tarefa em passos menores.</div>
+          <div class="flex items-center gap-2">
+            <input id="subtaskInput" type="text" placeholder="Adicionar subtarefa e pressionar Enter"
+              class="flex-1 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-brand-500 outline-none text-sm" />
+            <button type="button" id="subtaskAddBtn" class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold" aria-label="Adicionar subtarefa">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
         <div class="flex items-center gap-3 pt-2">
           <button type="submit" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold">
             <i data-lucide="check" class="w-4 h-4"></i> Salvar

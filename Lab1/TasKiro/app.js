@@ -7,10 +7,19 @@ const STORAGE_KEY = 'taskiro.state.v1';
 
 const defaultState = {
   tasks: [
-    { id: uid(), title: 'Revisar proposta do cliente', desc: 'Ajustar escopo e valores antes do envio.', due: todayISO(), priority: 'high', project: 'work', starred: true, done: false, created: Date.now() - 500000 },
-    { id: uid(), title: 'Enviar relatório mensal', desc: 'Consolidar métricas de agosto.', due: addDaysISO(-1), priority: 'medium', project: 'work', starred: false, done: true, created: Date.now() - 900000 },
-    { id: uid(), title: 'Planejar sprint de design', desc: 'Definir prioridades do time de UX.', due: addDaysISO(2), priority: 'medium', project: 'design', starred: false, done: false, created: Date.now() - 300000 },
-    { id: uid(), title: 'Comprar mantimentos', desc: '', due: todayISO(), priority: 'low', project: 'personal', starred: false, done: false, created: Date.now() - 100000 },
+    { id: uid(), title: 'Revisar proposta do cliente', desc: 'Ajustar escopo e valores antes do envio.', due: todayISO(), priority: 'high', project: 'work', starred: true, done: false, created: Date.now() - 500000, subtasks: [
+      { id: uid(), title: 'Ler briefing', done: true },
+      { id: uid(), title: 'Revisar valores', done: true },
+      { id: uid(), title: 'Ajustar escopo', done: false },
+      { id: uid(), title: 'Enviar para aprovação', done: false },
+    ] },
+    { id: uid(), title: 'Enviar relatório mensal', desc: 'Consolidar métricas de agosto.', due: addDaysISO(-1), priority: 'medium', project: 'work', starred: false, done: true, created: Date.now() - 900000, subtasks: [] },
+    { id: uid(), title: 'Planejar sprint de design', desc: 'Definir prioridades do time de UX.', due: addDaysISO(2), priority: 'medium', project: 'design', starred: false, done: false, created: Date.now() - 300000, subtasks: [
+      { id: uid(), title: 'Coletar pendências', done: true },
+      { id: uid(), title: 'Priorizar backlog', done: false },
+      { id: uid(), title: 'Estimar esforço', done: false },
+    ] },
+    { id: uid(), title: 'Comprar mantimentos', desc: '', due: todayISO(), priority: 'low', project: 'personal', starred: false, done: false, created: Date.now() - 100000, subtasks: [] },
   ],
   projects: [
     { id: 'work', name: 'Trabalho', color: 'bg-brand-500' },
@@ -81,6 +90,17 @@ function priorityMeta(p) {
 }
 
 function projectById(id) { return state.projects.find(p => p.id === id); }
+
+/* ---------- subtasks ---------- */
+// Ensure every task has a subtasks array (backward compatible with older saved state).
+function ensureSubtasks(t) { if (!Array.isArray(t.subtasks)) t.subtasks = []; return t.subtasks; }
+function subtaskProgress(t) {
+  const subs = ensureSubtasks(t);
+  const total = subs.length;
+  const done = subs.filter(s => s.done).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return { total, done, pct };
+}
 
 function matchesFilter(t) {
   switch (state.filter) {
@@ -177,6 +197,7 @@ function taskCard(t) {
   const pm = priorityMeta(t.priority);
   const proj = projectById(t.project);
   const dueInfo = formatDue(t.due, t.done);
+  const prog = subtaskProgress(t);
 
   const card = document.createElement('div');
   card.className = `group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-start gap-3 hover:shadow-md transition ${t.done ? 'opacity-70' : ''}`;
@@ -196,7 +217,17 @@ function taskCard(t) {
       <div class="flex flex-wrap items-center gap-3 mt-3 text-xs">
         <span class="inline-flex items-center gap-1 ${dueInfo.cls}"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> ${dueInfo.text}</span>
         ${proj ? `<span class="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400"><span class="w-2 h-2 rounded-full ${proj.color}"></span>${escapeHtml(proj.name)}</span>` : ''}
+        ${prog.total ? `<button class="toggle-subtasks inline-flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 font-medium" aria-label="Mostrar subtarefas">
+          <i data-lucide="list-checks" class="w-3.5 h-3.5"></i> ${prog.done} de ${prog.total}
+          <i data-lucide="chevron-down" class="subtasks-chevron w-3.5 h-3.5 transition-transform"></i>
+        </button>` : ''}
       </div>
+      ${prog.total ? `
+        <div class="mt-2 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+          <div class="h-full rounded-full ${prog.pct === 100 ? 'bg-emerald-500' : 'bg-brand-500'} transition-all" style="width: ${prog.pct}%"></div>
+        </div>
+        <div class="subtasks-panel mt-3 space-y-1.5" hidden></div>
+      ` : ''}
     </div>
     <div class="flex items-center gap-1 shrink-0">
       <button class="toggle-star p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Favoritar">
@@ -216,6 +247,23 @@ function taskCard(t) {
   $('.toggle-star', card).addEventListener('click', () => toggleStar(t.id));
   $('.edit-task', card).addEventListener('click', () => openTaskModal(t.id));
   $('.delete-task', card).addEventListener('click', () => askDelete(t.id));
+
+  // inline subtask expand/collapse + toggling
+  if (prog.total) {
+    const toggleBtn = $('.toggle-subtasks', card);
+    const panel = $('.subtasks-panel', card);
+    const chevron = $('.subtasks-chevron', card);
+    toggleBtn.addEventListener('click', () => {
+      const willOpen = panel.hidden;
+      panel.hidden = !willOpen;
+      chevron.classList.toggle('rotate-180', willOpen);
+      if (willOpen) {
+        panel.innerHTML = '';
+        ensureSubtasks(t).forEach(s => panel.appendChild(subtaskRow(t, s)));
+        lucide.createIcons();
+      }
+    });
+  }
 
   // drag & drop reorder
   card.addEventListener('dragstart', () => { card.classList.add('dragging'); dragId = t.id; });
@@ -240,6 +288,31 @@ function reorder(fromId, toId) {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ---------- inline subtask row (on the card) ---------- */
+function subtaskRow(task, sub) {
+  const row = document.createElement('div');
+  row.className = 'flex items-center gap-2 text-sm';
+  row.innerHTML = `
+    <button class="sub-toggle shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition ${sub.done ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600 hover:border-brand-500'}" aria-label="Concluir subtarefa">
+      ${sub.done ? '<i data-lucide="check" class="w-2.5 h-2.5 text-white"></i>' : ''}
+    </button>
+    <span class="${sub.done ? 'line-through text-slate-400' : 'text-slate-600 dark:text-slate-300'} break-words">${escapeHtml(sub.title)}</span>
+  `;
+  $('.sub-toggle', row).addEventListener('click', () => toggleSubtask(task.id, sub.id));
+  return row;
+}
+
+/* ---------- subtask CRUD (operates on state) ---------- */
+function toggleSubtask(taskId, subId) {
+  const t = state.tasks.find(x => x.id === taskId);
+  if (!t) return;
+  const s = ensureSubtasks(t).find(x => x.id === subId);
+  if (!s) return;
+  s.done = !s.done;
+  saveState();
+  render();
 }
 
 /* ---------- projects ---------- */
@@ -297,6 +370,9 @@ function confirmDelete() {
 }
 
 /* ---------- task modal ---------- */
+// Draft subtasks being edited in the modal (committed to the task only on save).
+let draftSubtasks = [];
+
 function openTaskModal(id = null) {
   const form = $('#taskForm');
   form.reset();
@@ -311,13 +387,63 @@ function openTaskModal(id = null) {
       $('#taskDue').value = t.due || '';
       $('#taskPriority').value = t.priority;
       $('#taskProject').value = t.project;
+      // clone so edits are only applied on save
+      draftSubtasks = ensureSubtasks(t).map(s => ({ ...s }));
     }
   } else {
     $('#modalTitle').textContent = 'Nova tarefa';
     $('#taskProject').value = (state.filter !== 'all' && projectById(state.filter)) ? state.filter : state.projects[0]?.id;
+    draftSubtasks = [];
   }
+  $('#subtaskInput').value = '';
+  renderDraftSubtasks();
   openLayer($('#taskModal'));
   setTimeout(() => $('#taskTitle').focus(), 50);
+}
+
+/* ---------- modal subtask editor ---------- */
+function renderDraftSubtasks() {
+  const wrap = $('#subtaskList');
+  wrap.innerHTML = '';
+  const total = draftSubtasks.length;
+  const done = draftSubtasks.filter(s => s.done).length;
+
+  $('#subtaskEmpty').hidden = total > 0;
+  $('#subtaskProgressLabel').textContent = total ? `${done} de ${total} concluídas` : '';
+
+  draftSubtasks.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 px-2.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800';
+    row.innerHTML = `
+      <button type="button" class="draft-toggle shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition ${s.done ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600 hover:border-brand-500'}" aria-label="Concluir subtarefa">
+        ${s.done ? '<i data-lucide="check" class="w-2.5 h-2.5 text-white"></i>' : ''}
+      </button>
+      <span class="flex-1 text-sm ${s.done ? 'line-through text-slate-400' : ''} break-words">${escapeHtml(s.title)}</span>
+      <button type="button" class="draft-remove shrink-0 p-1 rounded-md hover:bg-rose-50 dark:hover:bg-rose-500/10" aria-label="Remover subtarefa">
+        <i data-lucide="x" class="w-4 h-4 text-slate-400 hover:text-rose-500"></i>
+      </button>
+    `;
+    $('.draft-toggle', row).addEventListener('click', () => {
+      s.done = !s.done;
+      renderDraftSubtasks();
+    });
+    $('.draft-remove', row).addEventListener('click', () => {
+      draftSubtasks = draftSubtasks.filter(x => x.id !== s.id);
+      renderDraftSubtasks();
+    });
+    wrap.appendChild(row);
+  });
+  lucide.createIcons();
+}
+
+function addDraftSubtask() {
+  const input = $('#subtaskInput');
+  const title = input.value.trim();
+  if (!title) { toast('Informe o título da subtarefa', 'warning'); return; }
+  draftSubtasks.push({ id: uid(), title, done: false });
+  input.value = '';
+  input.focus();
+  renderDraftSubtasks();
 }
 
 function submitTask(e) {
@@ -329,6 +455,7 @@ function submitTask(e) {
     due: $('#taskDue').value,
     priority: $('#taskPriority').value,
     project: $('#taskProject').value,
+    subtasks: draftSubtasks.map(s => ({ ...s })),
   };
   if (!data.title) { toast('Informe um título', 'warning'); return; }
 
@@ -426,6 +553,12 @@ function init() {
   // Forms
   $('#taskForm').addEventListener('submit', submitTask);
   $('#projectForm').addEventListener('submit', submitProject);
+
+  // Subtasks (inside task modal)
+  $('#subtaskAddBtn').addEventListener('click', addDraftSubtask);
+  $('#subtaskInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addDraftSubtask(); }
+  });
 
   // Color picker
   $$('.color-swatch').forEach(s => s.addEventListener('click', () => { selectedColor = s.dataset.color; highlightColor(); }));
