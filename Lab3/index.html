@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TasKiro — Gerenciador de Tarefas</title>
+
+  <!-- Tailwind CSS via Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+              400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+              800: '#3730a3', 900: '#312e81'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Garante que qualquer elemento oculto realmente desapareça e não intercepte cliques,
+       vencendo qualquer display definido por classe utilitária. */
+    [hidden] {
+      display: none !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
+    /* Esconde a barra de rolagem padrão de forma sutil */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    .fade-in { animation: fadeIn .18s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .modal-pop { animation: modalPop .2s cubic-bezier(.16,1,.3,1); }
+    @keyframes modalPop { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+    .toast-in { animation: toastIn .25s cubic-bezier(.16,1,.3,1); }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+  <!-- ============ LAYOUT ============ -->
+  <div class="flex min-h-screen">
+
+    <!-- ============ SIDEBAR (fixa) ============ -->
+    <aside id="sidebar"
+      class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col -translate-x-full lg:translate-x-0 transition-transform duration-200">
+      <!-- Logo -->
+      <div class="h-16 flex items-center gap-3 px-5 border-b border-slate-200 shrink-0">
+        <img src="https://kiro.dev/images/community/events/thumbnails/meetup2.svg"
+             alt="Logo TasKiro" class="h-9 w-9 rounded-lg object-contain" />
+        <div class="leading-tight">
+          <p class="font-extrabold text-lg tracking-tight text-slate-900">TasKiro</p>
+          <p class="text-[11px] text-slate-400 font-medium">Gerenciador de tarefas</p>
+        </div>
+      </div>
+
+      <!-- Navegação -->
+      <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <p class="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Menu</p>
+        <button data-view="all" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+          <i data-lucide="layout-list" class="w-[18px] h-[18px]"></i>
+          <span>Todas as tarefas</span>
+          <span data-count="all" class="ml-auto text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">0</span>
+        </button>
+        <button data-view="today" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+          <i data-lucide="sun" class="w-[18px] h-[18px]"></i>
+          <span>Hoje</span>
+          <span data-count="today" class="ml-auto text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">0</span>
+        </button>
+        <button data-view="upcoming" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+          <i data-lucide="calendar-clock" class="w-[18px] h-[18px]"></i>
+          <span>Próximas</span>
+          <span data-count="upcoming" class="ml-auto text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">0</span>
+        </button>
+        <button data-view="completed" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+          <i data-lucide="check-check" class="w-[18px] h-[18px]"></i>
+          <span>Concluídas</span>
+          <span data-count="completed" class="ml-auto text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">0</span>
+        </button>
+
+        <p class="px-3 mt-5 mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Projetos</p>
+        <div id="projectList" class="space-y-1"></div>
+        <button id="addProjectBtn" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-brand-600 hover:bg-brand-50 transition">
+          <i data-lucide="plus" class="w-[18px] h-[18px]"></i>
+          <span>Novo projeto</span>
+        </button>
+      </nav>
+
+      <!-- Rodapé do usuário -->
+      <div class="border-t border-slate-200 p-3 shrink-0">
+        <button id="userMenuBtn" class="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-100 transition">
+          <span class="w-9 h-9 rounded-full bg-brand-600 text-white grid place-items-center font-semibold text-sm">AS</span>
+          <span class="text-left leading-tight flex-1">
+            <span class="block text-sm font-semibold text-slate-800">Ana Silva</span>
+            <span class="block text-xs text-slate-400">ana@taskiro.app</span>
+          </span>
+          <i data-lucide="chevron-up" class="w-4 h-4 text-slate-400"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Overlay para sidebar em mobile -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-30 bg-slate-900/40 lg:hidden" hidden></div>
+
+    <!-- ============ CONTEÚDO PRINCIPAL ============ -->
+    <div class="flex-1 lg:ml-64 flex flex-col min-w-0">
+
+      <!-- Header (fixo no topo) -->
+      <header class="sticky top-0 z-20 h-16 bg-white/90 backdrop-blur border-b border-slate-200 flex items-center gap-3 px-4 sm:px-6">
+        <button id="openSidebarBtn" class="lg:hidden p-2 -ml-1 rounded-lg hover:bg-slate-100 text-slate-600">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+
+        <div>
+          <h1 id="viewTitle" class="text-lg font-bold text-slate-900 leading-tight">Todas as tarefas</h1>
+          <p id="viewSubtitle" class="text-xs text-slate-400 hidden sm:block">Gerencie tudo em um só lugar</p>
+        </div>
+
+        <!-- Busca -->
+        <div class="relative ml-auto hidden md:block">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="searchInput" type="text" placeholder="Buscar tarefas..."
+            class="w-56 lg:w-72 pl-9 pr-3 py-2 text-sm bg-slate-100 border border-transparent rounded-lg focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition" />
+        </div>
+
+        <!-- Alternar visualização -->
+        <div class="hidden sm:flex items-center bg-slate-100 rounded-lg p-0.5 ml-auto md:ml-0">
+          <button data-layout="list" class="layout-btn p-1.5 rounded-md text-slate-500" title="Lista">
+            <i data-lucide="list" class="w-4 h-4"></i>
+          </button>
+          <button data-layout="board" class="layout-btn p-1.5 rounded-md text-slate-500" title="Quadro">
+            <i data-lucide="columns-3" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <button id="notifBtn" class="relative p-2 rounded-lg hover:bg-slate-100 text-slate-600">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+        </button>
+
+        <button id="newTaskBtn" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg transition shadow-sm">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Nova tarefa</span>
+        </button>
+      </header>
+
+      <!-- Barra de filtros -->
+      <div class="px-4 sm:px-6 py-3 bg-white border-b border-slate-200 flex flex-wrap items-center gap-2">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">Prioridade</span>
+        <button data-priority="all" class="prio-filter text-xs font-medium px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Todas</button>
+        <button data-priority="high" class="prio-filter text-xs font-medium px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Alta</button>
+        <button data-priority="medium" class="prio-filter text-xs font-medium px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Média</button>
+        <button data-priority="low" class="prio-filter text-xs font-medium px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Baixa</button>
+
+        <div class="ml-auto flex items-center gap-2">
+          <button id="sortBtn" class="flex items-center gap-1.5 text-xs font-medium text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">
+            <i data-lucide="arrow-down-up" class="w-3.5 h-3.5"></i>
+            <span id="sortLabel">Ordenar: Prazo</span>
+          </button>
+          <button id="clearCompletedBtn" class="flex items-center gap-1.5 text-xs font-medium text-rose-600 px-3 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-50">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Limpar concluídas</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Área das tarefas -->
+      <main class="flex-1 p-4 sm:p-6">
+        <!-- Visão Lista -->
+        <div id="listView" class="max-w-4xl mx-auto space-y-3"></div>
+
+        <!-- Visão Quadro (Kanban) -->
+        <div id="boardView" class="grid grid-cols-1 md:grid-cols-3 gap-4" hidden></div>
+
+        <!-- Estado vazio -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center text-center py-20">
+          <div class="w-16 h-16 rounded-2xl bg-brand-50 grid place-items-center mb-4">
+            <i data-lucide="clipboard-list" class="w-8 h-8 text-brand-500"></i>
+          </div>
+          <h3 class="font-semibold text-slate-700">Nenhuma tarefa por aqui</h3>
+          <p class="text-sm text-slate-400 mt-1 mb-4">Crie sua primeira tarefa para começar.</p>
+          <button id="emptyNewTaskBtn" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Nova tarefa
+          </button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ MENU DO USUÁRIO (popover fixo) ============ -->
+  <div id="userMenu" class="fixed bottom-20 left-3 z-50 w-56 bg-white rounded-xl shadow-xl border border-slate-200 p-1.5 fade-in" hidden>
+    <button data-action="profile" class="menu-action w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-100">
+      <i data-lucide="user" class="w-4 h-4"></i> Meu perfil
+    </button>
+    <button data-action="settings" class="menu-action w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-100">
+      <i data-lucide="settings" class="w-4 h-4"></i> Configurações
+    </button>
+    <div class="my-1 border-t border-slate-100"></div>
+    <button data-action="logout" class="menu-action w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-rose-600 hover:bg-rose-50">
+      <i data-lucide="log-out" class="w-4 h-4"></i> Sair
+    </button>
+  </div>
+
+  <!-- ============ PAINEL DE NOTIFICAÇÕES (fixo) ============ -->
+  <div id="notifPanel" class="fixed top-16 right-4 z-50 w-80 bg-white rounded-xl shadow-xl border border-slate-200 fade-in" hidden>
+    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+      <h3 class="font-semibold text-slate-800 text-sm">Notificações</h3>
+      <button id="markAllReadBtn" class="text-xs font-medium text-brand-600 hover:underline">Marcar todas como lidas</button>
+    </div>
+    <div id="notifList" class="max-h-80 overflow-y-auto divide-y divide-slate-100"></div>
+  </div>
+
+  <!-- ============ MODAL: NOVA/EDITAR TAREFA ============ -->
+  <div id="taskModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" hidden>
+    <div class="absolute inset-0 bg-slate-900/50" data-close="taskModal"></div>
+    <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl modal-pop max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
+        <h2 id="taskModalTitle" class="font-bold text-slate-900">Nova tarefa</h2>
+        <button class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500" data-close="taskModal">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="taskForm" class="px-6 py-5 space-y-4">
+        <input type="hidden" id="taskId" />
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Título</label>
+          <input id="taskTitle" type="text" required placeholder="O que precisa ser feito?"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+          <textarea id="taskDesc" rows="3" placeholder="Adicione detalhes (opcional)"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Prazo</label>
+            <input id="taskDue" type="date"
+              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Prioridade</label>
+            <select id="taskPriority"
+              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none bg-white">
+              <option value="low">Baixa</option>
+              <option value="medium" selected>Média</option>
+              <option value="high">Alta</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Projeto</label>
+          <select id="taskProject"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none bg-white"></select>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" class="px-4 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100" data-close="taskModal">Cancelar</button>
+          <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm">Salvar tarefa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: NOVO PROJETO ============ -->
+  <div id="projectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" hidden>
+    <div class="absolute inset-0 bg-slate-900/50" data-close="projectModal"></div>
+    <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl modal-pop">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h2 class="font-bold text-slate-900">Novo projeto</h2>
+        <button class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500" data-close="projectModal">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="projectForm" class="px-6 py-5 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Nome do projeto</label>
+          <input id="projectName" type="text" required placeholder="Ex.: Marketing"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">Cor</label>
+          <div id="colorPicker" class="flex items-center gap-2"></div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" class="px-4 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100" data-close="projectModal">Cancelar</button>
+          <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm">Criar projeto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: CONFIRMAÇÃO ============ -->
+  <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" hidden>
+    <div class="absolute inset-0 bg-slate-900/50" data-close="confirmModal"></div>
+    <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl modal-pop p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-rose-100 grid place-items-center mx-auto mb-4">
+        <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-600"></i>
+      </div>
+      <h2 id="confirmTitle" class="font-bold text-slate-900">Confirmar ação</h2>
+      <p id="confirmMessage" class="text-sm text-slate-500 mt-1 mb-5">Tem certeza?</p>
+      <div class="flex items-center gap-2">
+        <button class="flex-1 px-4 py-2 text-sm font-medium text-slate-600 rounded-lg border border-slate-200 hover:bg-slate-100" data-close="confirmModal">Cancelar</button>
+        <button id="confirmOkBtn" class="flex-1 px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TOASTS ============ -->
+  <div id="toastContainer" class="fixed top-20 right-4 z-[60] space-y-2 w-80 max-w-[calc(100vw-2rem)]"></div>
+
+  <!-- ============ SCRIPT ============ -->
+  <script>
+    // ---------- Estado ----------
+    const PROJECT_COLORS = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#ef4444', '#8b5cf6'];
+
+    const state = {
+      view: 'all',
+      layout: 'list',
+      priorityFilter: 'all',
+      search: '',
+      sort: 'due',
+      activeProject: null,
+      projects: [
+        { id: 'p1', name: 'Trabalho', color: '#6366f1' },
+        { id: 'p2', name: 'Pessoal', color: '#10b981' },
+        { id: 'p3', name: 'Estudos', color: '#f59e0b' }
+      ],
+      tasks: [],
+      notifications: [
+        { id: 'n1', text: 'Reunião de planejamento às 15h', time: 'há 10 min', read: false },
+        { id: 'n2', text: 'Tarefa "Revisar proposta" vence hoje', time: 'há 1 h', read: false },
+        { id: 'n3', text: 'Bem-vinda ao TasKiro!', time: 'há 2 dias', read: true }
+      ],
+      selectedColor: PROJECT_COLORS[0]
+    };
+
+    // Datas auxiliares
+    const today = new Date(); today.setHours(0,0,0,0);
+    const iso = (d) => d.toISOString().split('T')[0];
+    const addDays = (n) => { const d = new Date(today); d.setDate(d.getDate()+n); return iso(d); };
+
+    // Tarefas de exemplo
+    state.tasks = [
+      { id: 't1', title: 'Finalizar apresentação do trimestre', desc: 'Slides + dados de vendas', due: addDays(0), priority: 'high', project: 'p1', status: 'doing', done: false },
+      { id: 't2', title: 'Responder e-mails de clientes', desc: '', due: addDays(0), priority: 'medium', project: 'p1', status: 'todo', done: false },
+      { id: 't3', title: 'Comprar mantimentos', desc: 'Frutas, café e pão', due: addDays(1), priority: 'low', project: 'p2', status: 'todo', done: false },
+      { id: 't4', title: 'Estudar capítulo 5 de UX', desc: 'Heurísticas de Nielsen', due: addDays(2), priority: 'medium', project: 'p3', status: 'todo', done: false },
+      { id: 't5', title: 'Agendar consulta médica', desc: '', due: addDays(-1), priority: 'high', project: 'p2', status: 'todo', done: false },
+      { id: 't6', title: 'Revisar pull request da equipe', desc: 'Feature de login', due: addDays(3), priority: 'medium', project: 'p1', status: 'done', done: true },
+      { id: 't7', title: 'Planejar viagem de férias', desc: '', due: addDays(10), priority: 'low', project: 'p2', status: 'doing', done: false }
+    ];
+
+    let confirmCallback = null;
+    let uid = 100;
+    const newId = (p) => p + (uid++);
+
+    // ---------- Utilidades ----------
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+    const PRIORITY = {
+      high:   { label: 'Alta',  dot: 'bg-rose-500',   chip: 'bg-rose-50 text-rose-700 border-rose-200' },
+      medium: { label: 'Média', dot: 'bg-amber-500',  chip: 'bg-amber-50 text-amber-700 border-amber-200' },
+      low:    { label: 'Baixa', dot: 'bg-emerald-500',chip: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+    };
+
+    const projectById = (id) => state.projects.find(p => p.id === id);
+
+    function formatDue(due) {
+      if (!due) return { text: 'Sem prazo', cls: 'text-slate-400', icon: 'calendar' };
+      const d = new Date(due + 'T00:00:00');
+      const diff = Math.round((d - today) / 86400000);
+      if (diff < 0) return { text: `Atrasada (${Math.abs(diff)}d)`, cls: 'text-rose-600 font-medium', icon: 'calendar-x' };
+      if (diff === 0) return { text: 'Hoje', cls: 'text-brand-600 font-medium', icon: 'calendar-clock' };
+      if (diff === 1) return { text: 'Amanhã', cls: 'text-slate-500', icon: 'calendar' };
+      const fmt = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+      return { text: fmt, cls: 'text-slate-500', icon: 'calendar' };
+    }
+
+    // ---------- Toasts ----------
+    function toast(message, type = 'success') {
+      const cfg = {
+        success: { icon: 'check-circle-2', cls: 'text-emerald-600', bar: 'bg-emerald-500' },
+        info:    { icon: 'info',           cls: 'text-brand-600',   bar: 'bg-brand-500' },
+        error:   { icon: 'x-circle',       cls: 'text-rose-600',    bar: 'bg-rose-500' }
+      }[type] || {};
+      const el = document.createElement('div');
+      el.className = 'toast-in relative bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex items-start gap-3 p-3 pl-4';
+      el.innerHTML = `
+        <span class="absolute left-0 top-0 bottom-0 w-1 ${cfg.bar}"></span>
+        <i data-lucide="${cfg.icon}" class="w-5 h-5 ${cfg.cls} shrink-0 mt-0.5"></i>
+        <p class="text-sm text-slate-700 flex-1">${message}</p>
+        <button class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>`;
+      $('#toastContainer').appendChild(el);
+      lucide.createIcons();
+      const remove = () => { el.style.opacity = '0'; el.style.transform = 'translateX(24px)'; el.style.transition = 'all .2s'; setTimeout(() => el.remove(), 200); };
+      el.querySelector('button').addEventListener('click', remove);
+      setTimeout(remove, 3200);
+    }
+
+    // ---------- Modais (genérico) ----------
+    function openModal(id) { const m = $('#' + id); if (m) { m.hidden = false; lucide.createIcons(); } }
+    function closeModal(id) { const m = $('#' + id); if (m) m.hidden = true; }
+
+    // ---------- Renderização ----------
+    function getFilteredTasks() {
+      let list = state.tasks.slice();
+
+      // Visão / projeto
+      if (state.activeProject) {
+        list = list.filter(t => t.project === state.activeProject);
+      } else {
+        switch (state.view) {
+          case 'today': list = list.filter(t => t.due === iso(today) && !t.done); break;
+          case 'upcoming': list = list.filter(t => t.due && t.due > iso(today) && !t.done); break;
+          case 'completed': list = list.filter(t => t.done); break;
+          case 'all': default: break;
+        }
+      }
+
+      // Prioridade
+      if (state.priorityFilter !== 'all') list = list.filter(t => t.priority === state.priorityFilter);
+
+      // Busca
+      if (state.search.trim()) {
+        const q = state.search.toLowerCase();
+        list = list.filter(t => t.title.toLowerCase().includes(q) || (t.desc || '').toLowerCase().includes(q));
+      }
+
+      // Ordenação
+      const prioRank = { high: 0, medium: 1, low: 2 };
+      list.sort((a, b) => {
+        if (state.sort === 'priority') return prioRank[a.priority] - prioRank[b.priority];
+        if (state.sort === 'title') return a.title.localeCompare(b.title);
+        // due
+        if (!a.due) return 1; if (!b.due) return -1;
+        return a.due.localeCompare(b.due);
+      });
+      return list;
+    }
+
+    function taskCardHTML(t) {
+      const p = PRIORITY[t.priority];
+      const proj = projectById(t.project);
+      const due = formatDue(t.due);
+      return `
+      <div class="task-card group bg-white rounded-xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition p-4 flex items-start gap-3 fade-in" data-id="${t.id}">
+        <button class="toggle-done mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 grid place-items-center transition
+          ${t.done ? 'bg-brand-600 border-brand-600 text-white' : 'border-slate-300 hover:border-brand-500'}" title="Concluir">
+          ${t.done ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
+        </button>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start gap-2">
+            <p class="font-medium text-slate-800 ${t.done ? 'line-through text-slate-400' : ''} flex-1">${t.title}</p>
+            <span class="shrink-0 inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${p.chip}">
+              <span class="w-1.5 h-1.5 rounded-full ${p.dot}"></span>${p.label}
+            </span>
+          </div>
+          ${t.desc ? `<p class="text-sm text-slate-500 mt-0.5 ${t.done ? 'line-through' : ''}">${t.desc}</p>` : ''}
+          <div class="flex items-center gap-3 mt-2 text-xs">
+            ${proj ? `<span class="inline-flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded-full" style="background:${proj.color}"></span>${proj.name}</span>` : ''}
+            <span class="inline-flex items-center gap-1 ${due.cls}"><i data-lucide="${due.icon}" class="w-3.5 h-3.5"></i>${due.text}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+          <button class="edit-task p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-brand-600" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button class="delete-task p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>
+      </div>`;
+    }
+
+    function renderList(list) {
+      const c = $('#listView');
+      c.innerHTML = list.map(taskCardHTML).join('');
+    }
+
+    function renderBoard(list) {
+      const cols = [
+        { key: 'todo',  label: 'A fazer',     icon: 'circle',        accent: 'text-slate-500' },
+        { key: 'doing', label: 'Em progresso',icon: 'loader',        accent: 'text-brand-600' },
+        { key: 'done',  label: 'Concluído',   icon: 'check-circle-2',accent: 'text-emerald-600' }
+      ];
+      const c = $('#boardView');
+      c.innerHTML = cols.map(col => {
+        const items = list.filter(t => (col.key === 'done' ? t.done : (!t.done && t.status === col.key)));
+        return `
+        <div class="bg-slate-50 rounded-xl border border-slate-200 flex flex-col">
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-200">
+            <i data-lucide="${col.icon}" class="w-4 h-4 ${col.accent}"></i>
+            <h3 class="font-semibold text-sm text-slate-700">${col.label}</h3>
+            <span class="ml-auto text-xs bg-white border border-slate-200 text-slate-500 px-2 py-0.5 rounded-full">${items.length}</span>
+          </div>
+          <div class="p-3 space-y-3 flex-1 min-h-[120px]">
+            ${items.length ? items.map(taskCardHTML).join('') : '<p class="text-xs text-slate-400 text-center py-6">Vazio</p>'}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function render() {
+      const list = getFilteredTasks();
+
+      // Layout
+      const listView = $('#listView'), boardView = $('#boardView'), empty = $('#emptyState');
+      if (list.length === 0) {
+        listView.hidden = true; boardView.hidden = true;
+        empty.hidden = false; empty.classList.add('flex');
+      } else {
+        empty.hidden = true; empty.classList.remove('flex');
+        if (state.layout === 'list') {
+          listView.hidden = false; boardView.hidden = true; renderList(list);
+        } else {
+          listView.hidden = true; boardView.hidden = false; renderBoard(list);
+        }
+      }
+
+      updateCounts();
+      lucide.createIcons();
+    }
+
+    function updateCounts() {
+      const counts = {
+        all: state.tasks.length,
+        today: state.tasks.filter(t => t.due === iso(today) && !t.done).length,
+        upcoming: state.tasks.filter(t => t.due && t.due > iso(today) && !t.done).length,
+        completed: state.tasks.filter(t => t.done).length
+      };
+      Object.entries(counts).forEach(([k, v]) => { const el = $(`[data-count="${k}"]`); if (el) el.textContent = v; });
+    }
+
+    function renderProjects() {
+      const c = $('#projectList');
+      c.innerHTML = state.projects.map(p => `
+        <button data-project="${p.id}" class="project-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+          <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${p.color}"></span>
+          <span class="flex-1 text-left truncate">${p.name}</span>
+          <span class="text-xs text-slate-400">${state.tasks.filter(t => t.project === p.id).length}</span>
+        </button>`).join('');
+      // Atualiza select do modal de tarefa
+      const sel = $('#taskProject');
+      sel.innerHTML = state.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      bindProjectItems();
+    }
+
+    function renderNotifications() {
+      const c = $('#notifList');
+      c.innerHTML = state.notifications.map(n => `
+        <div class="flex items-start gap-3 px-4 py-3 ${n.read ? '' : 'bg-brand-50/40'}">
+          <span class="mt-1 w-2 h-2 rounded-full shrink-0 ${n.read ? 'bg-slate-300' : 'bg-brand-500'}"></span>
+          <div class="flex-1">
+            <p class="text-sm text-slate-700">${n.text}</p>
+            <p class="text-xs text-slate-400 mt-0.5">${n.time}</p>
+          </div>
+        </div>`).join('');
+      const hasUnread = state.notifications.some(n => !n.read);
+      const dot = $('#notifBtn span');
+      if (dot) dot.style.display = hasUnread ? '' : 'none';
+    }
+
+    function setActiveNav() {
+      $$('.nav-item').forEach(b => {
+        const on = !state.activeProject && b.dataset.view === state.view;
+        b.classList.toggle('bg-brand-50', on);
+        b.classList.toggle('text-brand-700', on);
+        b.classList.toggle('text-slate-600', !on);
+      });
+      $$('.project-item').forEach(b => {
+        const on = state.activeProject === b.dataset.project;
+        b.classList.toggle('bg-brand-50', on);
+        b.classList.toggle('text-brand-700', on);
+      });
+    }
+
+    function setViewTitle() {
+      const titles = { all: 'Todas as tarefas', today: 'Hoje', upcoming: 'Próximas', completed: 'Concluídas' };
+      const subs = {
+        all: 'Gerencie tudo em um só lugar', today: 'Foque no que importa hoje',
+        upcoming: 'Planeje seus próximos dias', completed: 'Tudo que você já finalizou'
+      };
+      if (state.activeProject) {
+        const p = projectById(state.activeProject);
+        $('#viewTitle').textContent = p ? p.name : 'Projeto';
+        $('#viewSubtitle').textContent = 'Tarefas do projeto';
+      } else {
+        $('#viewTitle').textContent = titles[state.view];
+        $('#viewSubtitle').textContent = subs[state.view];
+      }
+    }
+
+    function refresh() { setActiveNav(); setViewTitle(); render(); }
+
+    // ---------- Filtros de prioridade ----------
+    function updatePrioButtons() {
+      $$('.prio-filter').forEach(b => {
+        const on = b.dataset.priority === state.priorityFilter;
+        b.classList.toggle('bg-brand-600', on);
+        b.classList.toggle('text-white', on);
+        b.classList.toggle('border-brand-600', on);
+      });
+    }
+
+    function updateLayoutButtons() {
+      $$('.layout-btn').forEach(b => {
+        const on = b.dataset.layout === state.layout;
+        b.classList.toggle('bg-white', on);
+        b.classList.toggle('shadow-sm', on);
+        b.classList.toggle('text-brand-600', on);
+        b.classList.toggle('text-slate-500', !on);
+      });
+    }
+
+    // ---------- Eventos: tarefas ----------
+    function bindTaskActions() {
+      $('#listView').addEventListener('click', handleTaskClick);
+      $('#boardView').addEventListener('click', handleTaskClick);
+    }
+
+    function handleTaskClick(e) {
+      const card = e.target.closest('.task-card');
+      if (!card) return;
+      const id = card.dataset.id;
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+
+      if (e.target.closest('.toggle-done')) {
+        task.done = !task.done;
+        task.status = task.done ? 'done' : 'todo';
+        toast(task.done ? 'Tarefa concluída.' : 'Tarefa reaberta.', task.done ? 'success' : 'info');
+        refresh();
+      } else if (e.target.closest('.edit-task')) {
+        openTaskModal(task);
+      } else if (e.target.closest('.delete-task')) {
+        confirmAction('Excluir tarefa', `Deseja excluir "${task.title}"? Esta ação não pode ser desfeita.`, () => {
+          state.tasks = state.tasks.filter(t => t.id !== id);
+          toast('Tarefa excluída.', 'error');
+          refresh();
+        });
+      }
+    }
+
+    function bindProjectItems() {
+      $$('.project-item').forEach(b => {
+        b.addEventListener('click', () => {
+          state.activeProject = b.dataset.project;
+          closeSidebarMobile();
+          refresh();
+        });
+      });
+    }
+
+    // ---------- Modal de tarefa ----------
+    function openTaskModal(task = null) {
+      $('#taskForm').reset();
+      if (task) {
+        $('#taskModalTitle').textContent = 'Editar tarefa';
+        $('#taskId').value = task.id;
+        $('#taskTitle').value = task.title;
+        $('#taskDesc').value = task.desc || '';
+        $('#taskDue').value = task.due || '';
+        $('#taskPriority').value = task.priority;
+        $('#taskProject').value = task.project;
+      } else {
+        $('#taskModalTitle').textContent = 'Nova tarefa';
+        $('#taskId').value = '';
+        if (state.activeProject) $('#taskProject').value = state.activeProject;
+      }
+      openModal('taskModal');
+      setTimeout(() => $('#taskTitle').focus(), 50);
+    }
+
+    // ---------- Confirmação ----------
+    function confirmAction(title, message, cb) {
+      $('#confirmTitle').textContent = title;
+      $('#confirmMessage').textContent = message;
+      confirmCallback = cb;
+      openModal('confirmModal');
+    }
+
+    // ---------- Cores do projeto ----------
+    function renderColorPicker() {
+      const c = $('#colorPicker');
+      c.innerHTML = PROJECT_COLORS.map(col => `
+        <button type="button" data-color="${col}" class="color-swatch w-7 h-7 rounded-full transition ring-offset-2 ${col === state.selectedColor ? 'ring-2 ring-slate-400' : ''}" style="background:${col}"></button>`).join('');
+      $$('.color-swatch', c).forEach(b => b.addEventListener('click', () => {
+        state.selectedColor = b.dataset.color;
+        renderColorPicker();
+      }));
+    }
+
+    // ---------- Popovers (fechar ao clicar fora) ----------
+    function closeAllPopovers() { $('#userMenu').hidden = true; $('#notifPanel').hidden = true; }
+
+    function closeSidebarMobile() {
+      $('#sidebar').classList.add('-translate-x-full');
+      $('#sidebarOverlay').hidden = true;
+    }
+
+    // ---------- Inicialização de eventos ----------
+    function init() {
+      renderProjects();
+      renderNotifications();
+      renderColorPicker();
+      updatePrioButtons();
+      updateLayoutButtons();
+      bindTaskActions();
+      refresh();
+
+      // Navegação de visões
+      $$('.nav-item').forEach(b => b.addEventListener('click', () => {
+        state.view = b.dataset.view;
+        state.activeProject = null;
+        closeSidebarMobile();
+        refresh();
+      }));
+
+      // Filtros de prioridade
+      $$('.prio-filter').forEach(b => b.addEventListener('click', () => {
+        state.priorityFilter = b.dataset.priority;
+        updatePrioButtons();
+        render();
+      }));
+
+      // Layout
+      $$('.layout-btn').forEach(b => b.addEventListener('click', () => {
+        state.layout = b.dataset.layout;
+        updateLayoutButtons();
+        render();
+      }));
+
+      // Busca
+      $('#searchInput').addEventListener('input', (e) => { state.search = e.target.value; render(); });
+
+      // Ordenação (cicla entre opções)
+      const sortOptions = [
+        { key: 'due', label: 'Ordenar: Prazo' },
+        { key: 'priority', label: 'Ordenar: Prioridade' },
+        { key: 'title', label: 'Ordenar: Título' }
+      ];
+      $('#sortBtn').addEventListener('click', () => {
+        const i = sortOptions.findIndex(o => o.key === state.sort);
+        const next = sortOptions[(i + 1) % sortOptions.length];
+        state.sort = next.key;
+        $('#sortLabel').textContent = next.label;
+        render();
+        toast('Ordenação atualizada.', 'info');
+      });
+
+      // Limpar concluídas
+      $('#clearCompletedBtn').addEventListener('click', () => {
+        const n = state.tasks.filter(t => t.done).length;
+        if (n === 0) { toast('Não há tarefas concluídas.', 'info'); return; }
+        confirmAction('Limpar concluídas', `Remover ${n} tarefa(s) concluída(s)?`, () => {
+          state.tasks = state.tasks.filter(t => !t.done);
+          toast('Tarefas concluídas removidas.', 'success');
+          refresh();
+        });
+      });
+
+      // Nova tarefa
+      $('#newTaskBtn').addEventListener('click', () => openTaskModal());
+      $('#emptyNewTaskBtn').addEventListener('click', () => openTaskModal());
+
+      // Form tarefa
+      $('#taskForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = $('#taskId').value;
+        const data = {
+          title: $('#taskTitle').value.trim(),
+          desc: $('#taskDesc').value.trim(),
+          due: $('#taskDue').value,
+          priority: $('#taskPriority').value,
+          project: $('#taskProject').value
+        };
+        if (!data.title) return;
+        if (id) {
+          const t = state.tasks.find(x => x.id === id);
+          Object.assign(t, data);
+          toast('Tarefa atualizada.', 'success');
+        } else {
+          state.tasks.unshift({ id: newId('t'), ...data, status: 'todo', done: false });
+          toast('Tarefa criada.', 'success');
+        }
+        closeModal('taskModal');
+        refresh();
+      });
+
+      // Novo projeto
+      $('#addProjectBtn').addEventListener('click', () => {
+        $('#projectForm').reset();
+        state.selectedColor = PROJECT_COLORS[Math.floor(Math.random() * PROJECT_COLORS.length)];
+        renderColorPicker();
+        openModal('projectModal');
+        setTimeout(() => $('#projectName').focus(), 50);
+      });
+
+      $('#projectForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = $('#projectName').value.trim();
+        if (!name) return;
+        state.projects.push({ id: newId('p'), name, color: state.selectedColor });
+        renderProjects();
+        setActiveNav();
+        closeModal('projectModal');
+        toast('Projeto criado.', 'success');
+      });
+
+      // Confirmação
+      $('#confirmOkBtn').addEventListener('click', () => {
+        if (typeof confirmCallback === 'function') confirmCallback();
+        confirmCallback = null;
+        closeModal('confirmModal');
+      });
+
+      // Fechar modais via [data-close]
+      $$('[data-close]').forEach(el => el.addEventListener('click', () => closeModal(el.dataset.close)));
+
+      // Menu do usuário
+      $('#userMenuBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const m = $('#userMenu');
+        const willOpen = m.hidden;
+        closeAllPopovers();
+        m.hidden = !willOpen;
+      });
+      $$('.menu-action').forEach(b => b.addEventListener('click', () => {
+        const labels = { profile: 'Abrindo perfil...', settings: 'Abrindo configurações...', logout: 'Saindo da conta...' };
+        toast(labels[b.dataset.action] || 'Ação executada.', 'info');
+        closeAllPopovers();
+      }));
+
+      // Notificações
+      $('#notifBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const p = $('#notifPanel');
+        const willOpen = p.hidden;
+        closeAllPopovers();
+        p.hidden = !willOpen;
+      });
+      $('#markAllReadBtn').addEventListener('click', () => {
+        state.notifications.forEach(n => n.read = true);
+        renderNotifications();
+        toast('Notificações marcadas como lidas.', 'success');
+      });
+
+      // Sidebar mobile
+      $('#openSidebarBtn').addEventListener('click', () => {
+        $('#sidebar').classList.remove('-translate-x-full');
+        $('#sidebarOverlay').hidden = false;
+      });
+      $('#sidebarOverlay').addEventListener('click', closeSidebarMobile);
+
+      // Fechar popovers ao clicar fora
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#userMenu') && !e.target.closest('#userMenuBtn') &&
+            !e.target.closest('#notifPanel') && !e.target.closest('#notifBtn')) {
+          closeAllPopovers();
+        }
+      });
+
+      // Tecla ESC fecha camadas
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          ['taskModal', 'projectModal', 'confirmModal'].forEach(closeModal);
+          closeAllPopovers();
+        }
+      });
+
+      lucide.createIcons();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
